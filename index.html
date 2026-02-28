@@ -18,8 +18,6 @@ body{
   display:flex; flex-direction:column;
   user-select:none; cursor:crosshair; color:var(--text);
 }
-
-/* TOP BAR */
 #topbar{
   height:40px; background:var(--panel); border-bottom:1px solid var(--border);
   display:flex; align-items:center; justify-content:space-between;
@@ -28,131 +26,73 @@ body{
 #timerFill{
   position:absolute; left:0; top:0; bottom:0;
   background:linear-gradient(90deg,#3a0000,#b91c1c,#ff4444);
-  pointer-events:none; opacity:.7;
-  transition:width .15s linear;
+  pointer-events:none; opacity:.7; transition:width .15s linear;
 }
 #timerFill.urgent{ background:linear-gradient(90deg,#700,#f00,#ff6060); opacity:.9; }
 #stockBadge{ position:relative; z-index:2; display:flex; align-items:center; gap:10px; }
-#stockTag{
-  font-size:.85rem; font-weight:700; background:var(--gold); color:#000;
-  padding:3px 9px; border-radius:3px; letter-spacing:.05em;
-}
+#stockTag{ font-size:.85rem; font-weight:700; background:var(--gold); color:#000; padding:3px 9px; border-radius:3px; letter-spacing:.05em; }
 #stockFullName{ font-size:.78rem; color:#8899aa; }
 #livePrice{ font-size:.92rem; font-weight:700; color:#fff; margin-left:4px; }
 #livePriceDelta{ font-size:.75rem; font-weight:600; margin-left:4px; }
 #timerPill{
-  position:relative; z-index:2;
-  font-size:.85rem; font-weight:700; color:#fff;
+  position:relative; z-index:2; font-size:.85rem; font-weight:700; color:#fff;
   background:#991b1b; padding:3px 12px; border-radius:3px; min-width:40px; text-align:center;
 }
 #timerPill.urgent{ background:#dc2626; animation:pulse .5s ease-in-out infinite alternate; }
 @keyframes pulse{ from{opacity:1} to{opacity:.6} }
-
-/* HUD */
-#hud{
-  display:flex; flex-shrink:0;
-  border-bottom:1px solid var(--border); background:var(--panel);
-}
-.hud-cell{
-  padding:7px 20px; border-right:1px solid var(--border);
-  display:flex; flex-direction:column; gap:2px; min-width:0;
-}
+#hud{ display:flex; flex-shrink:0; border-bottom:1px solid var(--border); background:var(--panel); }
+.hud-cell{ padding:7px 20px; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:2px; min-width:0; }
 .hud-cell:last-child{ border-right:none; margin-left:auto; }
 .hud-lbl{ font-size:.58rem; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; white-space:nowrap; }
 .hud-val{ font-size:1rem; font-weight:700; color:#fff; white-space:nowrap; }
 .hud-val.green{ color:var(--green); }
-.hud-val.red  { color:var(--red); }
-
-/* CHARTS */
+.hud-val.red{ color:var(--red); }
 .main{ flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
 .charts{ flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
 .chart-wrap{ position:relative; overflow:hidden; min-height:0; }
-#mainWrap  { flex:0 0 65%; }
+#mainWrap{ flex:0 0 65%; }
 #equityWrap{ flex:0 0 35%; border-top:1px solid var(--border); }
 canvas{ display:block; width:100%; height:100%; }
-.chart-label{
-  position:absolute; top:7px; left:14px;
-  font-size:.65rem; font-weight:600; letter-spacing:.1em;
-  color:var(--dim); text-transform:uppercase; pointer-events:none;
-}
-
-/* TRADE FLASH */
-#tradeFlash{
-  position:absolute; top:35%; left:50%; transform:translate(-50%,-50%);
-  font-size:2.2rem; font-weight:700; letter-spacing:.25em;
-  opacity:0; pointer-events:none; transition:opacity .08s; z-index:20;
-  text-shadow:0 0 50px currentColor;
-}
-
-/* HOLDING INDICATOR */
-#holdingBar{
-  position:absolute; bottom:42px; left:50%; transform:translateX(-50%);
-  font-size:.7rem; font-weight:700; letter-spacing:.15em;
-  padding:4px 14px; border-radius:2px; background:rgba(0,230,118,.15);
-  border:1px solid var(--green); color:var(--green);
-  opacity:0; pointer-events:none; transition:opacity .2s; z-index:15;
-}
+.chart-label{ position:absolute; top:7px; left:14px; font-size:.65rem; font-weight:600; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; pointer-events:none; }
+#tradeFlash{ position:absolute; top:35%; left:50%; transform:translate(-50%,-50%); font-size:2.2rem; font-weight:700; letter-spacing:.25em; opacity:0; pointer-events:none; transition:opacity .08s; z-index:20; text-shadow:0 0 50px currentColor; }
+#holdingBar{ position:absolute; bottom:42px; left:50%; transform:translateX(-50%); font-size:.7rem; font-weight:700; letter-spacing:.15em; padding:4px 14px; border-radius:2px; background:rgba(0,230,118,.15); border:1px solid var(--green); color:var(--green); opacity:0; pointer-events:none; transition:opacity .2s; z-index:15; }
 #holdingBar.show{ opacity:1; }
-
-/* HINT */
-#hint{
-  position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
-  font-size:.62rem; letter-spacing:.18em; color:#243040;
-  pointer-events:none; z-index:10; white-space:nowrap;
-}
-
-/* OVERLAY */
-#overlay{
-  position:fixed; inset:0; z-index:100;
-  background:rgba(4,6,10,.94);
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center; gap:24px;
-  opacity:0; pointer-events:none;
-  transition:opacity .3s;
-}
+#hint{ position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:.62rem; letter-spacing:.18em; color:#243040; pointer-events:none; z-index:10; white-space:nowrap; }
+#overlay{ position:fixed; inset:0; z-index:100; background:rgba(4,6,10,.94); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; opacity:0; pointer-events:none; transition:opacity .3s; }
 #overlay.show{ opacity:1; pointer-events:all; }
-#ov-title{
-  font-size:1.4rem; font-weight:700; letter-spacing:.3em;
-  color:#fff; text-transform:uppercase;
-}
+#ov-title{ font-size:1.4rem; font-weight:700; letter-spacing:.3em; color:#fff; text-transform:uppercase; }
 #ov-subtitle{ font-size:.72rem; color:var(--dim); letter-spacing:.1em; }
-
-/* Summary cards */
-#ov-cards{
-  display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px;
-  background:var(--border); border:1px solid var(--border);
-  min-width:480px;
-}
-.ov-card{
-  background:var(--panel); padding:16px 22px;
-  display:flex; flex-direction:column; gap:4px;
-}
+#ov-cards{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; background:var(--border); border:1px solid var(--border); min-width:480px; }
+.ov-card{ background:var(--panel); padding:16px 22px; display:flex; flex-direction:column; gap:4px; }
 .ov-card-lbl{ font-size:.58rem; letter-spacing:.15em; color:var(--dim); text-transform:uppercase; }
 .ov-card-val{ font-size:1.25rem; font-weight:700; color:#fff; }
 .ov-card-val.green{ color:var(--green); }
-.ov-card-val.red  { color:var(--red); }
-.ov-card-val.gold { color:var(--gold); }
-
-/* Round result banner */
-#ov-result{
-  font-size:3rem; font-weight:700; letter-spacing:.1em;
-  text-shadow:0 0 60px currentColor;
-}
+.ov-card-val.red{ color:var(--red); }
+.ov-card-val.gold{ color:var(--gold); }
+#ov-result{ font-size:3rem; font-weight:700; letter-spacing:.1em; text-shadow:0 0 60px currentColor; }
 #ov-result.green{ color:var(--green); }
-#ov-result.red  { color:var(--red); }
-
-#ov-btn{
-  font-family:'IBM Plex Mono',monospace; font-size:.85rem; font-weight:700;
-  letter-spacing:.15em; text-transform:uppercase;
-  background:var(--gold); color:#000; border:none;
-  padding:14px 44px; border-radius:3px; cursor:pointer;
-  transition:transform .1s, opacity .1s; margin-top:8px;
-}
+#ov-result.red{ color:var(--red); }
+#ov-btn{ font-family:'IBM Plex Mono',monospace; font-size:.85rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; background:var(--gold); color:#000; border:none; padding:14px 44px; border-radius:3px; cursor:pointer; transition:transform .1s,opacity .1s; margin-top:8px; }
 #ov-btn:hover{ opacity:.85; transform:scale(1.02); }
 #ov-click-hint{ font-size:.58rem; color:var(--dim); letter-spacing:.1em; }
+
+/* LOADING SCREEN */
+#loading{ position:fixed; inset:0; z-index:200; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
+#loading.hide{ display:none; }
+#loading-text{ font-size:.8rem; letter-spacing:.2em; color:var(--dim); }
+#loading-bar{ width:200px; height:2px; background:var(--border); border-radius:1px; overflow:hidden; }
+#loading-fill{ height:100%; background:var(--gold); width:0%; transition:width .2s; }
+#loading-error{ font-size:.75rem; color:var(--red); letter-spacing:.1em; max-width:400px; text-align:center; display:none; }
 </style>
 </head>
 <body>
+
+<div id="loading">
+  <div style="font-size:1.2rem;font-weight:700;letter-spacing:.3em;color:var(--gold)">TRADER</div>
+  <div id="loading-text">LOADING STOCKS...</div>
+  <div id="loading-bar"><div id="loading-fill"></div></div>
+  <div id="loading-error"></div>
+</div>
 
 <div id="topbar">
   <div id="timerFill" style="width:100%"></div>
@@ -210,101 +150,134 @@ canvas{ display:block; width:100%; height:100%; }
 'use strict';
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
-const fmt   = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const fmtS  = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
-const signed = n => (n>=0?'+':'-') + fmt(n);
+const fmt    = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtS   = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+const signed  = n => (n>=0?'+':'-') + fmt(n);
 const signedPct = n => (n>=0?'+':'') + n.toFixed(2) + '%';
-
 function hexRgb(h){ return `${parseInt(h.slice(1,3),16)},${parseInt(h.slice(3,5),16)},${parseInt(h.slice(5,7),16)}`; }
 function fmtDate(str){
   if(!str) return '';
-  const d=new Date(str+'T12:00:00');
-  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-}
-function makeDates(start,count){
-  const d=[]; let c=new Date(start+'T12:00:00');
-  while(d.length<count){
-    if(c.getDay()!==0&&c.getDay()!==6) d.push(c.toISOString().slice(0,10));
-    c=new Date(c.getTime()+86400000);
-  }
-  return d;
+  const d = new Date(str+'T12:00:00');
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
 }
 
-// ─── PRICE GENERATOR ────────────────────────────────────────────────────────
-function generatePrices(startPrice, seed) {
-  let s = seed;
-  const rand = () => { s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; };
-  const randn = () => Math.sqrt(-2*Math.log(rand()+1e-10))*Math.cos(2*Math.PI*rand());
-  const prices=[];
-  let p=startPrice, vol=0.022, momentum=0, momDecay=0;
-  for(let i=0;i<500;i++){
-    vol=Math.max(0.010,Math.min(0.075,vol*0.91+0.010*rand()+0.003));
-    if(rand()<0.035){
-      const isCrash=rand()<0.52;
-      momentum=(isCrash?-1:1)*(0.05+rand()*0.10);
-      momDecay=0.72+rand()*0.18;
-      vol*=3.0;
+// ─── CSV PARSER ──────────────────────────────────────────────────────────────
+// Parses Yahoo Finance CSV format. Returns {prices, dates} arrays.
+// Accepts both "Close" and "Adj Close" columns.
+// Skips rows with null/0 prices (e.g. stock splits, missing data).
+function parseYahooCSV(text) {
+  const lines = text.trim().split('\n').map(l => l.trim()).filter(Boolean);
+  if (lines.length < 2) throw new Error('CSV too short');
+
+  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,'').toLowerCase());
+  const dateIdx  = headers.indexOf('date');
+  // Prefer "adj close" for split-adjusted prices, fall back to "close"
+  let closeIdx = headers.indexOf('adj close');
+  if (closeIdx === -1) closeIdx = headers.indexOf('close');
+  if (dateIdx === -1 || closeIdx === -1) throw new Error('Missing Date or Close columns');
+
+  const prices = [], dates = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(',');
+    const dateStr = cols[dateIdx]?.trim().replace(/"/g,'');
+    const closeStr = cols[closeIdx]?.trim().replace(/"/g,'');
+    const price = parseFloat(closeStr);
+    if (!dateStr || isNaN(price) || price <= 0) continue;
+    dates.push(dateStr);
+    prices.push(Math.round(price * 100) / 100);
+  }
+  if (prices.length < 50) throw new Error('Not enough data rows (need 50+)');
+  return { prices, dates };
+}
+
+// ─── STOCK POOL ──────────────────────────────────────────────────────────────
+// Loaded from server. Each entry: { sym, name, color, prices, dates }
+const STOCK_COLORS = [
+  '#4a9eff','#f5a623','#76ff03','#e879f9',
+  '#fb923c','#60a5fa','#34d399','#f472b6',
+  '#a78bfa','#fbbf24','#38bdf8','#4ade80',
+];
+let STOCK_POOL = [];   // filled by loadStocks()
+let SYMS = [];         // list of symbol strings
+
+// ─── LOAD STOCKS FROM SERVER ─────────────────────────────────────────────────
+async function loadStocks() {
+  const loadingEl   = document.getElementById('loading');
+  const loadingText = document.getElementById('loading-text');
+  const loadingFill = document.getElementById('loading-fill');
+  const loadingErr  = document.getElementById('loading-error');
+
+  try {
+    // 1. Get list of available stocks
+    loadingText.textContent = 'FETCHING STOCK LIST...';
+    const listRes = await fetch('/api/stocks');
+    if (!listRes.ok) throw new Error('Could not reach /api/stocks');
+    const { stocks } = await listRes.json();
+    if (!stocks || stocks.length === 0) throw new Error('No CSV files found in /stocks folder');
+
+    // 2. Load each CSV
+    for (let i = 0; i < stocks.length; i++) {
+      const sym = stocks[i];
+      loadingText.textContent = `LOADING ${sym}... (${i+1}/${stocks.length})`;
+      loadingFill.style.width = ((i+1)/stocks.length*100) + '%';
+
+      try {
+        const csvRes = await fetch(`/api/csv?symbol=${encodeURIComponent(sym)}`);
+        if (!csvRes.ok) throw new Error(`HTTP ${csvRes.status}`);
+        const csvText = await csvRes.text();
+        const { prices, dates } = parseYahooCSV(csvText);
+
+        STOCK_POOL.push({
+          sym,
+          name: sym,   // just use ticker as name unless you add a mapping
+          color: STOCK_COLORS[i % STOCK_COLORS.length],
+          prices,
+          dates,
+        });
+      } catch(e) {
+        console.warn(`Skipping ${sym}:`, e.message);
+      }
     }
-    momentum*=momDecay;
-    if(Math.abs(momentum)<0.001){momentum=0;momDecay=0;}
-    const meanRev=(startPrice-p)/startPrice*0.012;
-    const ret=momentum+meanRev+vol*randn();
-    p=Math.max(startPrice*0.2,p*(1+ret));
-    prices.push(Math.round(p*100)/100);
+
+    if (STOCK_POOL.length === 0) throw new Error('All CSVs failed to parse');
+
+    SYMS = STOCK_POOL.map(s => s.sym);
+    loadingEl.classList.add('hide');
+    init();
+
+  } catch(e) {
+    loadingText.textContent = 'ERROR';
+    loadingErr.style.display = 'block';
+    loadingErr.textContent = e.message + '\n\nMake sure you have CSV files in the /stocks folder.';
   }
-  return prices;
 }
 
-const DATES_500=makeDates('2022-01-03',500);
-const STOCKS={
-  AAPL: {name:'Apple Inc.',      color:'#4a9eff',start:182,seed:0xDEAD1},
-  TSLA: {name:'Tesla Inc.',      color:'#f5a623',start:220,seed:0xBEEF2},
-  NVDA: {name:'NVIDIA Corp.',    color:'#76ff03',start:280,seed:0xCAFE3},
-  GOOGL:{name:'Alphabet Inc.',   color:'#e879f9',start:130,seed:0xFACE4},
-  AMZN: {name:'Amazon.com Inc.', color:'#fb923c',start:175,seed:0xD00D5},
-  META: {name:'Meta Platforms',  color:'#60a5fa',start:310,seed:0xBABE6},
-  MSFT: {name:'Microsoft Corp.', color:'#34d399',start:375,seed:0xC0DE7},
-};
-Object.keys(STOCKS).forEach(sym=>{
-  const s=STOCKS[sym];
-  s.prices=generatePrices(s.start,s.seed);
-  s.dates=DATES_500.slice();
-});
-const SYMS=Object.keys(STOCKS);
-
-// ─── CONSTANTS ──────────────────────────────────────────────────────────────
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
 const TOTAL    = 200;
 const ROUND_MS = 30000;
-const TICK_MS  = ROUND_MS / TOTAL;  // 150ms per tick
+const TICK_MS  = ROUND_MS / TOTAL;
 
-// ─── STATE ──────────────────────────────────────────────────────────────────
+// ─── STATE ───────────────────────────────────────────────────────────────────
 let balance=100, totalPnL=0, roundNum=0;
 let holding=false, entryPrice=null, entryIdx=null;
 let revealed=0, roundStart=null, running=false;
-let currentSym='AAPL', PRICES=[], DATES=[], equityCurve=[100];
+let currentSym='', PRICES=[], DATES=[], equityCurve=[100];
 let balanceAtRoundStart=100;
 let tickHandle=null;
 
-// ─── ZOOM STATE ─────────────────────────────────────────────────────────────
-// zoomLevel: 1.0 = 200 ticks visible (zoomed out), 0.3 = 60 ticks visible (zoomed in)
-// zoomTarget driven by volatility: high vol = zoom in, low vol = zoom out
-let zoomLevel   = 1.0;
-let zoomTarget  = 1.0;
-const ZOOM_LERP = 0.015;  // very slow, smooth zoom
-const ZOOM_MIN  = 0.25;   // most zoomed in (25% of TOTAL = 50 ticks)
-const ZOOM_MAX  = 1.00;   // most zoomed out (100% = 200 ticks)
+// ─── ZOOM ────────────────────────────────────────────────────────────────────
+let zoomLevel=1.0, zoomTarget=1.0;
+const ZOOM_LERP=0.015, ZOOM_MIN=0.25, ZOOM_MAX=1.00;
 
-// ─── CAMERA (viewport Y shift for foreshadowing) ────────────────────────────
+// ─── CAMERA ──────────────────────────────────────────────────────────────────
 let camShift=0, camShiftTarget=0;
-const CAM_LERP    = 0.08;
-const CAM_AHEAD   = 14;
-const CAM_STRENGTH= 0.30;
+const CAM_LERP=0.08, CAM_AHEAD=14, CAM_STRENGTH=0.30;
 
-// ─── CANVAS ─────────────────────────────────────────────────────────────────
-const mainCanvas  =document.getElementById('mainChart');
-const equityCanvas=document.getElementById('equityChart');
-const mCtx=mainCanvas.getContext('2d');
-const eCtx=equityCanvas.getContext('2d');
+// ─── CANVAS ──────────────────────────────────────────────────────────────────
+const mainCanvas  = document.getElementById('mainChart');
+const equityCanvas= document.getElementById('equityChart');
+const mCtx = mainCanvas.getContext('2d');
+const eCtx = equityCanvas.getContext('2d');
 const mW=()=>mainCanvas.offsetWidth;
 const mH=()=>mainCanvas.offsetHeight;
 const eW=()=>equityCanvas.offsetWidth;
@@ -323,17 +296,12 @@ window.addEventListener('resize',resizeAll);
 // ─── ZOOM UPDATE ─────────────────────────────────────────────────────────────
 function updateZoom(){
   if(revealed<10) return;
-  // Measure recent volatility over last 20 bars
   const recent=PRICES.slice(Math.max(0,revealed-20),revealed);
   const lo=Math.min(...recent), hi=Math.max(...recent);
   const volPct=(hi-lo)/((lo+hi)/2||1);
-
-  // High volatility → zoom in (show fewer bars = bigger moves visible)
-  // Low volatility  → zoom out (show more bars = smoother)
-  // volPct ~0.01 = low, ~0.08 = high
   const normalized=Math.max(0,Math.min(1,(volPct-0.01)/0.07));
-  zoomTarget=ZOOM_MAX - normalized*(ZOOM_MAX-ZOOM_MIN);
-  zoomLevel+=( zoomTarget-zoomLevel)*ZOOM_LERP;
+  zoomTarget=ZOOM_MAX-normalized*(ZOOM_MAX-ZOOM_MIN);
+  zoomLevel+=(zoomTarget-zoomLevel)*ZOOM_LERP;
 }
 
 // ─── CAMERA UPDATE ───────────────────────────────────────────────────────────
@@ -358,61 +326,40 @@ function drawMain(){
   mCtx.clearRect(0,0,w,h);
   if(revealed<2) return;
 
-  // How many ticks visible based on zoom
   const VISIBLE=Math.max(20,Math.round(TOTAL*zoomLevel));
-
   const allRevealed=PRICES.slice(0,revealed);
   const allDates   =DATES.slice(0,revealed);
   const visible=allRevealed.slice(Math.max(0,allRevealed.length-VISIBLE));
   const vdates =allDates.slice(Math.max(0,allDates.length-VISIBLE));
 
-  // ── CLIP REGION: chart only renders in the safe band (15% to 85% of height) ──
-  const CLIP_TOP_PCT   = 0.10;   // 10% from top
-  const CLIP_BOT_PCT   = 0.10;   // 10% from bottom
-  const clipTop    = h*CLIP_TOP_PCT;
-  const clipBot    = h*(1-CLIP_BOT_PCT);
-  const clipH      = clipBot-clipTop;
-
-  // Padding within clip region
+  const CLIP_TOP=0.10, CLIP_BOT=0.10;
+  const clipTop=h*CLIP_TOP, clipBot=h*(1-CLIP_BOT), clipH=clipBot-clipTop;
   const padR=66, padB=30;
-  const cW=w-padR;
-  // padT and cH now relative to clip region
-  const padT=clipTop;
-  const cH=clipH-padB;
+  const cW=w-padR, padT=clipTop, cH=clipH-padB;
 
-  // Y scale
-  const minP=Math.min(...visible);
-  const maxP=Math.max(...visible);
+  const minP=Math.min(...visible), maxP=Math.max(...visible);
   const range=maxP-minP||1;
   const pad=range*0.10;
   const viewShift=camShift*range*CAM_STRENGTH;
-  const minPad=minP-pad+viewShift;
-  const maxPad=maxP+pad+viewShift;
+  const minPad=minP-pad+viewShift, maxPad=maxP+pad+viewShift;
 
   const xOf=i=>(i/(VISIBLE-1))*cW;
   const yOf=p=>padT+cH-((p-minPad)/(maxPad-minPad))*cH;
   const startSlot=VISIBLE-visible.length;
-  const sc=STOCKS[currentSym].color;
+  const sc=STOCK_POOL.find(s=>s.sym===currentSym)?.color||'#4a9eff';
 
-  // ── CLIP so chart can't draw outside the band ──
   mCtx.save();
-  mCtx.beginPath();
-  mCtx.rect(0,clipTop-2,w+2,clipH+4);
-  mCtx.clip();
+  mCtx.beginPath(); mCtx.rect(0,clipTop-2,w+2,clipH+4); mCtx.clip();
 
   // Grid
-  mCtx.strokeStyle='rgba(255,255,255,0.035)';
-  mCtx.lineWidth=1;
+  mCtx.strokeStyle='rgba(255,255,255,0.035)'; mCtx.lineWidth=1;
   for(let i=0;i<=5;i++){
     const y=padT+(i/5)*cH;
     mCtx.beginPath(); mCtx.moveTo(0,y); mCtx.lineTo(cW,y); mCtx.stroke();
   }
-
-  // Baseline
   mCtx.strokeStyle='rgba(255,255,255,0.08)';
   mCtx.beginPath(); mCtx.moveTo(0,padT+cH); mCtx.lineTo(cW,padT+cH); mCtx.stroke();
 
-  // Build step points
   const pts=visible.map((p,i)=>({x:xOf(startSlot+i),y:yOf(p)}));
   const last=pts[pts.length-1];
 
@@ -425,14 +372,12 @@ function drawMain(){
   mCtx.lineTo(last.x,clipBot+10); mCtx.lineTo(xOf(startSlot),clipBot+10); mCtx.closePath();
   const g=mCtx.createLinearGradient(0,padT,0,clipBot);
   const rgb=hexRgb(holding?'#00e676':sc);
-  g.addColorStop(0,`rgba(${rgb},0.15)`);
-  g.addColorStop(1,'rgba(0,0,0,0)');
+  g.addColorStop(0,`rgba(${rgb},0.15)`); g.addColorStop(1,'rgba(0,0,0,0)');
   mCtx.fillStyle=g; mCtx.fill();
 
-  // Step line
+  // Line
   const lineCol=holding?'#00e676':sc;
-  mCtx.strokeStyle=lineCol;
-  mCtx.lineWidth=1;
+  mCtx.strokeStyle=lineCol; mCtx.lineWidth=1;
   mCtx.shadowColor=lineCol; mCtx.shadowBlur=holding?8:4;
   mCtx.beginPath();
   pts.forEach((pt,i)=>{
@@ -448,59 +393,44 @@ function drawMain(){
     const ic=profit>=0?'#00e676':'#ff1744';
     const windowStart=Math.max(0,allRevealed.length-VISIBLE);
     const entrySlot=startSlot+(entryIdx-windowStart);
-    const x1=xOf(Math.max(0,entrySlot));
-    const y1=yOf(entryPrice);
+    const x1=xOf(Math.max(0,entrySlot)), y1=yOf(entryPrice);
     mCtx.save();
     mCtx.strokeStyle=ic; mCtx.lineWidth=1.5;
     mCtx.shadowColor=ic; mCtx.shadowBlur=8;
     mCtx.setLineDash([4,4]);
     mCtx.beginPath(); mCtx.moveTo(x1,y1); mCtx.lineTo(last.x,last.y); mCtx.stroke();
-    mCtx.setLineDash([]);
-    mCtx.shadowBlur=0;
+    mCtx.setLineDash([]); mCtx.shadowBlur=0;
     mCtx.beginPath(); mCtx.arc(x1,y1,4,0,Math.PI*2);
-    mCtx.fillStyle=ic; mCtx.shadowColor=ic; mCtx.shadowBlur=12;
-    mCtx.fill(); mCtx.shadowBlur=0;
+    mCtx.fillStyle=ic; mCtx.shadowColor=ic; mCtx.shadowBlur=12; mCtx.fill(); mCtx.shadowBlur=0;
     mCtx.restore();
-    // P&L label on the line
     const openPnL=(cur-entryPrice)*(balance/entryPrice);
-    mCtx.fillStyle=ic; mCtx.font='700 11px IBM Plex Mono,monospace';
-    mCtx.textAlign='right';
-    const midX=(x1+last.x)/2, midY=(y1+last.y)/2-8;
-    mCtx.fillText(signed(openPnL), Math.min(midX, cW-4), midY);
+    mCtx.fillStyle=ic; mCtx.font='700 11px IBM Plex Mono,monospace'; mCtx.textAlign='right';
+    mCtx.fillText(signed(openPnL),Math.min((x1+last.x)/2,cW-4),(y1+last.y)/2-8);
   }
 
-  mCtx.restore(); // end clip
+  mCtx.restore();
 
-  // ── Y labels (outside clip, always readable) ──
-  mCtx.fillStyle='#aabbcc';
-  mCtx.font='600 11px IBM Plex Mono,monospace';
-  mCtx.textAlign='right';
+  // Y labels
+  mCtx.fillStyle='#aabbcc'; mCtx.font='600 11px IBM Plex Mono,monospace'; mCtx.textAlign='right';
   for(let i=0;i<=5;i++){
     const val=maxPad-(i/5)*(maxPad-minPad);
     const y=padT+(i/5)*cH;
-    if(y>=clipTop-2&&y<=clipBot+2)
-      mCtx.fillText(fmtS(val),w-5,y+3);
+    if(y>=clipTop-2&&y<=clipBot+2) mCtx.fillText(fmtS(val),w-5,y+3);
   }
 
-  // ── X date labels ──
-  mCtx.fillStyle='#8899aa';
-  mCtx.font='600 10px IBM Plex Mono,monospace';
-  mCtx.textAlign='center';
+  // X date labels
+  mCtx.fillStyle='#8899aa'; mCtx.font='600 10px IBM Plex Mono,monospace'; mCtx.textAlign='center';
   const labelEvery=Math.max(5,Math.round(VISIBLE/8));
   vdates.forEach((d,i)=>{
-    if(i%labelEvery===0||i===vdates.length-1){
-      const x=xOf(startSlot+i);
-      mCtx.fillText(fmtDate(d),x,clipBot+22);
-    }
+    if(i%labelEvery===0||i===vdates.length-1)
+      mCtx.fillText(fmtDate(d),xOf(startSlot+i),clipBot+22);
   });
 
-  // ── Current dot (clamped to clip region) ──
+  // Dot
   const dotY=Math.max(clipTop+5,Math.min(clipBot-5,last.y));
   mCtx.beginPath(); mCtx.arc(last.x,dotY,4,0,Math.PI*2);
-  mCtx.fillStyle=lineCol; mCtx.shadowColor=lineCol; mCtx.shadowBlur=16;
-  mCtx.fill(); mCtx.shadowBlur=0;
+  mCtx.fillStyle=lineCol; mCtx.shadowColor=lineCol; mCtx.shadowBlur=16; mCtx.fill(); mCtx.shadowBlur=0;
 
-  // ── Chart label ──
   const d0=vdates[0],d1=vdates[vdates.length-1];
   document.getElementById('mainLabel').textContent=
     currentSym+'  ·  '+(d0?fmtDate(d0):'')+
@@ -510,32 +440,28 @@ function drawMain(){
 
 // ─── DRAW EQUITY ─────────────────────────────────────────────────────────────
 function drawEquity(){
-  const w=eW(), h=eH();
+  const w=eW(),h=eH();
   eCtx.clearRect(0,0,w,h);
   if(equityCurve.length<2) return;
   const padR=66,padT=12,padB=8;
-  const cW=w-padR, cH=h-padT-padB;
+  const cW=w-padR,cH=h-padT-padB;
   const n=equityCurve.length;
-  const minV=Math.min(...equityCurve)*0.995;
-  const maxV=Math.max(...equityCurve)*1.005;
+  const minV=Math.min(...equityCurve)*0.995,maxV=Math.max(...equityCurve)*1.005;
   const xOf=i=>(i/Math.max(n-1,1))*cW;
   const yOf=v=>padT+cH-((v-minV)/((maxV-minV)||1))*cH;
   const lastVal=equityCurve[n-1];
   const lc=lastVal>=100?'#00e676':'#ff1744';
 
-  // Grid
   eCtx.strokeStyle='rgba(255,255,255,0.04)'; eCtx.lineWidth=1;
   for(let i=0;i<=2;i++){
     const y=padT+(i/2)*cH;
     eCtx.beginPath(); eCtx.moveTo(0,y); eCtx.lineTo(cW,y); eCtx.stroke();
   }
-  // Y labels
   eCtx.fillStyle='#aabbcc'; eCtx.font='600 11px IBM Plex Mono,monospace'; eCtx.textAlign='right';
   for(let i=0;i<=2;i++){
     const val=maxV-(i/2)*(maxV-minV);
     eCtx.fillText(fmtS(val),w-5,padT+(i/2)*cH+3);
   }
-  // $100 ref
   const refY=yOf(100);
   eCtx.save(); eCtx.setLineDash([3,6]);
   eCtx.strokeStyle='rgba(255,255,255,0.1)';
@@ -544,7 +470,6 @@ function drawEquity(){
   eCtx.fillStyle='#8899aa'; eCtx.font='600 10px IBM Plex Mono,monospace'; eCtx.textAlign='left';
   eCtx.fillText('$100',4,refY-3);
 
-  // Fill
   eCtx.beginPath();
   equityCurve.forEach((v,i)=>{ const x=xOf(i),y=yOf(v); i===0?eCtx.moveTo(x,y):eCtx.lineTo(x,y); });
   eCtx.lineTo(xOf(n-1),h+5); eCtx.lineTo(0,h+5); eCtx.closePath();
@@ -553,29 +478,24 @@ function drawEquity(){
   eg.addColorStop(1,'rgba(0,0,0,0)');
   eCtx.fillStyle=eg; eCtx.fill();
 
-  // Line
   eCtx.beginPath();
   equityCurve.forEach((v,i)=>{ const x=xOf(i),y=yOf(v); i===0?eCtx.moveTo(x,y):eCtx.lineTo(x,y); });
-  eCtx.strokeStyle=lc; eCtx.lineWidth=1.5;
-  eCtx.shadowColor=lc; eCtx.shadowBlur=5;
+  eCtx.strokeStyle=lc; eCtx.lineWidth=1.5; eCtx.shadowColor=lc; eCtx.shadowBlur=5;
   eCtx.stroke(); eCtx.shadowBlur=0;
 
-  // Dot
   const dotX=xOf(n-1),dotY=yOf(lastVal);
   eCtx.beginPath(); eCtx.arc(dotX,dotY,3,0,Math.PI*2);
-  eCtx.fillStyle=lc; eCtx.shadowColor=lc; eCtx.shadowBlur=8;
-  eCtx.fill(); eCtx.shadowBlur=0;
+  eCtx.fillStyle=lc; eCtx.shadowColor=lc; eCtx.shadowBlur=8; eCtx.fill(); eCtx.shadowBlur=0;
   eCtx.fillStyle=lc; eCtx.font='700 11px IBM Plex Mono,monospace'; eCtx.textAlign='left';
   eCtx.fillText(fmt(lastVal),dotX+6,dotY+4);
   eCtx.fillStyle='#8899aa'; eCtx.font='600 10px IBM Plex Mono,monospace';
   eCtx.fillText('Round '+roundNum,6,padT+cH+8);
 }
 
-// ─── TIMER ───────────────────────────────────────────────────────────────────
+// ─── TIMER / HUD ─────────────────────────────────────────────────────────────
 function updateTimer(){
   const rem=Math.max(0,ROUND_MS-(Date.now()-roundStart));
-  const pct=rem/ROUND_MS;
-  document.getElementById('timerFill').style.width=(pct*100)+'%';
+  document.getElementById('timerFill').style.width=(rem/ROUND_MS*100)+'%';
   const secs=Math.ceil(rem/1000);
   document.getElementById('timerPill').textContent=secs;
   const urgent=secs<=8;
@@ -583,7 +503,6 @@ function updateTimer(){
   document.getElementById('timerFill').className=urgent?'urgent':'';
 }
 
-// ─── HUD ─────────────────────────────────────────────────────────────────────
 function updateHUD(){
   const cur=revealed>0?PRICES[revealed-1]:null;
   const prev=revealed>1?PRICES[revealed-2]:null;
@@ -591,28 +510,24 @@ function updateHUD(){
   document.getElementById('hRound').textContent=roundNum;
   document.getElementById('hStock').textContent=currentSym;
   document.getElementById('stockTag').textContent=currentSym;
-  document.getElementById('stockFullName').textContent=STOCKS[currentSym].name;
-
+  document.getElementById('stockFullName').textContent=
+    STOCK_POOL.find(s=>s.sym===currentSym)?.name||currentSym;
   if(cur){
     document.getElementById('livePrice').textContent=fmt(cur);
     if(prev){
-      const delta=cur-prev;
-      const pctD=(delta/prev)*100;
+      const delta=cur-prev, pctD=(delta/prev)*100;
       const el=document.getElementById('livePriceDelta');
       el.textContent=(delta>=0?'▲':'▼')+Math.abs(pctD).toFixed(2)+'%';
       el.style.color=delta>=0?'var(--green)':'var(--red)';
     }
   }
-
   const pct=((balance-100)/100)*100;
   const pEl=document.getElementById('hPct');
   pEl.textContent=signedPct(pct);
   pEl.className='hud-val '+(pct>0?'green':pct<0?'red':'');
-
   const pnlEl=document.getElementById('hPnl');
   pnlEl.textContent=totalPnL!==0?signed(totalPnL):'—';
   pnlEl.className='hud-val '+(totalPnL>0?'green':totalPnL<0?'red':'');
-
   const oEl=document.getElementById('hOpen');
   if(holding&&entryPrice&&cur){
     const u=(cur-entryPrice)*(balance/entryPrice);
@@ -648,8 +563,8 @@ function sell(){
   updateHUD(); drawMain();
 }
 
-document.addEventListener('mousedown', buy);
-document.addEventListener('mouseup',   sell);
+document.addEventListener('mousedown',buy);
+document.addEventListener('mouseup',sell);
 document.addEventListener('touchstart',e=>{e.preventDefault();buy();},{passive:false});
 document.addEventListener('touchend',  e=>{e.preventDefault();sell();},{passive:false});
 
@@ -657,15 +572,13 @@ document.addEventListener('touchend',  e=>{e.preventDefault();sell();},{passive:
 const overlay=document.getElementById('overlay');
 const ovBtn=document.getElementById('ov-btn');
 
-function showOverlay(isFirst, roundPnL){
+function showOverlay(isFirst,roundPnL){
   document.getElementById('ov-balance').textContent=fmt(balance);
   document.getElementById('ov-balance').className='ov-card-val'+(balance>=100?'':' red');
-
   const pct=((balance-100)/100)*100;
   const pctEl=document.getElementById('ov-pct');
   pctEl.textContent=signedPct(pct);
   pctEl.className='ov-card-val '+(pct>0?'green':pct<0?'red':'');
-
   const resultEl=document.getElementById('ov-result');
   if(isFirst){
     resultEl.style.display='none';
@@ -676,24 +589,22 @@ function showOverlay(isFirst, roundPnL){
     document.getElementById('ov-title').textContent='READY TO TRADE';
     document.getElementById('ov-subtitle').textContent='Your capital is at risk';
   } else {
-    // Big result number
     resultEl.style.display='block';
-    const roundPct=((roundPnL/balanceAtRoundStart)*100);
+    const roundPct=(roundPnL/balanceAtRoundStart)*100;
     resultEl.textContent=(roundPnL>=0?'+':'')+roundPct.toFixed(2)+'%';
     resultEl.className=roundPnL>=0?'green':'red';
-    document.getElementById('ov-title').textContent=roundPnL>=0?'ROUND COMPLETE':'ROUND COMPLETE';
+    document.getElementById('ov-title').textContent='ROUND COMPLETE';
     document.getElementById('ov-subtitle').textContent=
       roundPnL>=0?'Nice trade. Next round awaits.':'Better luck next time.';
-
     const pnlEl=document.getElementById('ov-pnl');
     pnlEl.textContent=signed(totalPnL);
     pnlEl.className='ov-card-val '+(totalPnL>=0?'green':'red');
-
     const rEl=document.getElementById('ov-roundpnl');
     rEl.textContent=signed(roundPnL);
     rEl.className='ov-card-val '+(roundPnL>=0?'green':'red');
   }
-
+  // Pick next stock now so we can show it
+  pickNextStock();
   document.getElementById('ov-stock').textContent=currentSym;
   document.getElementById('ov-round').textContent=roundNum+1;
   ovBtn.textContent=isFirst?'START ROUND 1':'NEXT ROUND →';
@@ -702,27 +613,25 @@ function showOverlay(isFirst, roundPnL){
 
 function hideOverlay(){ overlay.classList.remove('show'); }
 
-function startFromOverlay(){
-  hideOverlay();
-  startRound();
-}
+function startFromOverlay(){ hideOverlay(); startRound(); }
 ovBtn.addEventListener('click',e=>{e.stopPropagation();startFromOverlay();});
 overlay.addEventListener('click',startFromOverlay);
 
 // ─── ROUND FLOW ──────────────────────────────────────────────────────────────
-function prepareRound(randomStock=true){
-  if(randomStock){
-    const others=SYMS.filter(s=>s!==currentSym);
-    currentSym=others[Math.floor(Math.random()*others.length)];
-  }
-  const stock=STOCKS[currentSym];
-  const maxStart=stock.prices.length-TOTAL;
+function pickNextStock(){
+  // Pick a random stock different from last
+  const others=SYMS.filter(s=>s!==currentSym);
+  const pool=others.length>0?others:SYMS;
+  const chosen=pool[Math.floor(Math.random()*pool.length)];
+  const stockData=STOCK_POOL.find(s=>s.sym===chosen);
+
+  currentSym=chosen;
+  const maxStart=stockData.prices.length-TOTAL;
   const start=maxStart>0?Math.floor(Math.random()*maxStart):0;
-  PRICES=stock.prices.slice(start,start+TOTAL);
-  DATES=stock.dates.slice(start,start+TOTAL);
+  PRICES=stockData.prices.slice(start,start+TOTAL);
+  DATES=stockData.dates.slice(start,start+TOTAL);
   revealed=0; holding=false; entryPrice=null; entryIdx=null;
-  camShift=0; camShiftTarget=0;
-  zoomLevel=1.0; zoomTarget=1.0;
+  camShift=0; camShiftTarget=0; zoomLevel=1.0; zoomTarget=1.0;
   balanceAtRoundStart=balance;
 }
 
@@ -739,36 +648,30 @@ function endRound(){
   clearTimeout(tickHandle);
   if(holding) sell();
   const roundPnL=+(balance-balanceAtRoundStart).toFixed(2);
-  setTimeout(()=>{
-    prepareRound(true);
-    showOverlay(false,roundPnL);
-  },400);
+  setTimeout(()=>showOverlay(false,roundPnL),400);
 }
 
 function tick(){
-  // Check time first — end round when timer hits 0
   const elapsed=Date.now()-roundStart;
-  if(elapsed>=ROUND_MS||revealed>=TOTAL){
-    endRound();
-    return;
-  }
+  if(elapsed>=ROUND_MS||revealed>=TOTAL){ endRound(); return; }
   revealed++;
-  updateZoom();
-  updateCamera();
+  updateZoom(); updateCamera();
   equityCurve.push(balance);
-  updateTimer();
-  updateHUD();
-  drawMain();
-  drawEquity();
-  // Schedule next tick to maintain real-time pacing
+  updateTimer(); updateHUD(); drawMain(); drawEquity();
   const nextTick=roundStart+(revealed*TICK_MS)-Date.now();
   tickHandle=setTimeout(tick,Math.max(0,nextTick));
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
-resizeAll();
-prepareRound(false);
-showOverlay(true,0);
+function init(){
+  resizeAll();
+  // Pre-pick first stock so overlay shows something
+  const first=SYMS[Math.floor(Math.random()*SYMS.length)];
+  currentSym=first;
+  showOverlay(true,0);
+}
+
+loadStocks();
 </script>
 </body>
 </html>
