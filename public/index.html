@@ -162,31 +162,59 @@ function fmtDate(str){
 }
 
 // ─── CSV PARSER ──────────────────────────────────────────────────────────────
-// Parses Yahoo Finance CSV format. Returns {prices, dates} arrays.
-// Accepts both "Close" and "Adj Close" columns.
-// Skips rows with null/0 prices (e.g. stock splits, missing data).
 function parseYahooCSV(text) {
   const lines = text.trim().split('\n').map(l => l.trim()).filter(Boolean);
   if (lines.length < 2) throw new Error('CSV too short');
 
-  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,'').toLowerCase());
-  const dateIdx  = headers.indexOf('date');
-  // Prefer "adj close" for split-adjusted prices, fall back to "close"
-  let closeIdx = headers.indexOf('adj close');
-  if (closeIdx === -1) closeIdx = headers.indexOf('close');
-  if (dateIdx === -1 || closeIdx === -1) throw new Error('Missing Date or Close columns');
+  const sep = lines[0].includes('\t') ? '\t' : ',';
+  const rawHeaders = lines[0].split(sep).map(h => h.trim().replace(/"/g,'').toLowerCase());
+
+  // Find date and close column indices
+  let dateIdx = rawHeaders.findIndex(h => h === 'date');
+  if (dateIdx === -1) dateIdx = 0;
+
+  let closeIdx = rawHeaders.findIndex(h => h === 'adj close');
+  if (closeIdx === -1) closeIdx = rawHeaders.findIndex(h => h.includes('close'));
+  if (closeIdx === -1) throw new Error('No Close column found. Headers: ' + rawHeaders.join(', '));
+
+  // Normalize various date formats to YYYY-MM-DD
+  function normalizeDate(s) {
+    s = (s||'').trim().replace(/"/g,'');
+    if (!s) return null;
+    // YYYY-MM-DD already
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+    // M/D/YY or M/D/YYYY
+    if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)) {
+      const [m,d,y] = s.split('/');
+      const year = y.length===2 ? (parseInt(y)>30?'19'+y:'20'+y) : y;
+      return year+'-'+m.padStart(2,'0')+'-'+d.padStart(2,'0');
+    }
+    return null;
+  }
 
   const prices = [], dates = [];
+  // Start from line 1, skip any row where the date column doesn't parse
+  // (handles pandas multi-level header rows like the ticker name row)
   for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(',');
-    const dateStr = cols[dateIdx]?.trim().replace(/"/g,'');
-    const closeStr = cols[closeIdx]?.trim().replace(/"/g,'');
+    const cols = lines[i].split(sep);
+    if (cols.length <= Math.max(dateIdx, closeIdx)) continue;
+
+    const dateStr = normalizeDate(cols[dateIdx]);
+    if (!dateStr) continue; // skip ticker-name rows, blank rows, etc.
+
+    const closeStr = (cols[closeIdx]||'').trim().replace(/"/g,'');
     const price = parseFloat(closeStr);
-    if (!dateStr || isNaN(price) || price <= 0) continue;
+    if (isNaN(price) || price <= 0) continue;
+
     dates.push(dateStr);
     prices.push(Math.round(price * 100) / 100);
   }
-  if (prices.length < 50) throw new Error('Not enough data rows (need 50+)');
+
+  if (prices.length < 10) throw new Error(
+    'Only ' + prices.length + ' valid rows parsed. ' +
+    'Close column: "' + rawHeaders[closeIdx] + '". ' +
+    'First data line: ' + lines[1]
+  );
   return { prices, dates };
 }
 
@@ -208,38 +236,39 @@ async function loadStocks() {
   const loadingErr  = document.getElementById('loading-error');
 
   try {
-    // 1. Get list of available stocks
+    // 1. Fetch the stock list from static JSON
     loadingText.textContent = 'FETCHING STOCK LIST...';
-    const listRes = await fetch('/api/stocks');
-    if (!listRes.ok) throw new Error('Could not reach /api/stocks');
-    const { stocks } = await listRes.json();
-    if (!stocks || stocks.length === 0) throw new Error('No CSV files found in /stocks folder');
+    const listRes = await fetch('/stocks/index.json');
+    if (!listRes.ok) throw new Error('Could not load /stocks/index.json (HTTP ' + listRes.status + ')');
+    const stocks = await listRes.json();
+    if (!Array.isArray(stocks) || stocks.length === 0)
+      throw new Error('index.json is empty — add stock names to it');
 
-    // 2. Load each CSV
+    // 2. Fetch each CSV directly as a static file
     for (let i = 0; i < stocks.length; i++) {
       const sym = stocks[i];
-      loadingText.textContent = `LOADING ${sym}... (${i+1}/${stocks.length})`;
+      loadingText.textContent = 'LOADING ' + sym + '... (' + (i+1) + '/' + stocks.length + ')';
       loadingFill.style.width = ((i+1)/stocks.length*100) + '%';
 
       try {
-        const csvRes = await fetch(`/api/csv?symbol=${encodeURIComponent(sym)}`);
-        if (!csvRes.ok) throw new Error(`HTTP ${csvRes.status}`);
+        const csvRes = await fetch('/stocks/' + encodeURIComponent(sym) + '.csv');
+        if (!csvRes.ok) throw new Error('HTTP ' + csvRes.status);
         const csvText = await csvRes.text();
         const { prices, dates } = parseYahooCSV(csvText);
 
         STOCK_POOL.push({
           sym,
-          name: sym,   // just use ticker as name unless you add a mapping
+          name: sym,
           color: STOCK_COLORS[i % STOCK_COLORS.length],
           prices,
           dates,
         });
       } catch(e) {
-        console.warn(`Skipping ${sym}:`, e.message);
+        console.warn('Skipping ' + sym + ':', e.message);
       }
     }
 
-    if (STOCK_POOL.length === 0) throw new Error('All CSVs failed to parse');
+    if (STOCK_POOL.length === 0) throw new Error('All CSVs failed to parse — check your CSV files');
 
     SYMS = STOCK_POOL.map(s => s.sym);
     loadingEl.classList.add('hide');
@@ -248,7 +277,7 @@ async function loadStocks() {
   } catch(e) {
     loadingText.textContent = 'ERROR';
     loadingErr.style.display = 'block';
-    loadingErr.textContent = e.message + '\n\nMake sure you have CSV files in the /stocks folder.';
+    loadingErr.textContent = e.message;
   }
 }
 
