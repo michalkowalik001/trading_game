@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="theme-color" content="#080a0e">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TRADER</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -17,6 +18,7 @@ body{
   background:var(--bg); font-family:'IBM Plex Mono',monospace;
   display:flex; flex-direction:column;
   user-select:none; cursor:crosshair; color:var(--text);
+  touch-action:none; -webkit-tap-highlight-color:transparent;
 }
 #topbar{
   height:40px; background:var(--panel); border-bottom:1px solid var(--border);
@@ -31,7 +33,8 @@ body{
 #timerFill.urgent{ background:linear-gradient(90deg,#700,#f00,#ff6060); opacity:.9; }
 #stockBadge{ position:relative; z-index:2; display:flex; align-items:center; gap:10px; }
 #stockTag{ font-size:.85rem; font-weight:700; background:var(--gold); color:#000; padding:3px 9px; border-radius:3px; letter-spacing:.05em; }
-#stockFullName{ font-size:.78rem; color:#8899aa; }
+#stockFullName{ font-size:.78rem; color:#8899aa; display:none; }
+@media(min-width:600px){ #stockFullName{ display:inline; } }
 #livePrice{ font-size:.92rem; font-weight:700; color:#fff; margin-left:4px; }
 #livePriceDelta{ font-size:.75rem; font-weight:600; margin-left:4px; }
 #timerPill{
@@ -40,11 +43,12 @@ body{
 }
 #timerPill.urgent{ background:#dc2626; animation:pulse .5s ease-in-out infinite alternate; }
 @keyframes pulse{ from{opacity:1} to{opacity:.6} }
-#hud{ display:flex; flex-shrink:0; border-bottom:1px solid var(--border); background:var(--panel); }
-.hud-cell{ padding:7px 20px; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:2px; min-width:0; }
+#hud{ display:flex; flex-shrink:0; border-bottom:1px solid var(--border); background:var(--panel); overflow-x:auto; scrollbar-width:none; }
+#hud::-webkit-scrollbar{ display:none; }
+.hud-cell{ padding:6px 14px; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:2px; min-width:0; flex-shrink:0; }
 .hud-cell:last-child{ border-right:none; margin-left:auto; }
 .hud-lbl{ font-size:.58rem; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; white-space:nowrap; }
-.hud-val{ font-size:1rem; font-weight:700; color:#fff; white-space:nowrap; }
+.hud-val{ font-size:.88rem; font-weight:700; color:#fff; white-space:nowrap; }
 .hud-val.green{ color:var(--green); }
 .hud-val.red{ color:var(--red); }
 .main{ flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
@@ -54,22 +58,22 @@ body{
 #equityWrap{ flex:0 0 35%; border-top:1px solid var(--border); }
 canvas{ display:block; width:100%; height:100%; }
 .chart-label{ position:absolute; top:7px; left:14px; font-size:.65rem; font-weight:600; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; pointer-events:none; }
-#tradeFlash{ position:absolute; top:35%; left:50%; transform:translate(-50%,-50%); font-size:2.2rem; font-weight:700; letter-spacing:.25em; opacity:0; pointer-events:none; transition:opacity .08s; z-index:20; text-shadow:0 0 50px currentColor; }
+#tradeFlash{ position:absolute; top:35%; left:50%; transform:translate(-50%,-50%); font-size:clamp(1.2rem,6vw,2.2rem); font-weight:700; letter-spacing:.2em; opacity:0; pointer-events:none; transition:opacity .08s; z-index:20; text-shadow:0 0 50px currentColor; }
 #holdingBar{ position:absolute; bottom:42px; left:50%; transform:translateX(-50%); font-size:.7rem; font-weight:700; letter-spacing:.15em; padding:4px 14px; border-radius:2px; background:rgba(0,230,118,.15); border:1px solid var(--green); color:var(--green); opacity:0; pointer-events:none; transition:opacity .2s; z-index:15; }
 #holdingBar.show{ opacity:1; }
-#hint{ position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:.62rem; letter-spacing:.18em; color:#243040; pointer-events:none; z-index:10; white-space:nowrap; }
+#hint{ position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:.55rem; letter-spacing:.12em; color:#243040; pointer-events:none; z-index:10; white-space:nowrap; }
 #overlay{ position:fixed; inset:0; z-index:100; background:rgba(4,6,10,.94); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; opacity:0; pointer-events:none; transition:opacity .3s; }
 #overlay.show{ opacity:1; pointer-events:all; }
-#ov-title{ font-size:1.4rem; font-weight:700; letter-spacing:.3em; color:#fff; text-transform:uppercase; }
+#ov-title{ font-size:clamp(.9rem,4vw,1.4rem); font-weight:700; letter-spacing:.2em; color:#fff; text-transform:uppercase; }
 #ov-subtitle{ font-size:.72rem; color:var(--dim); letter-spacing:.1em; }
-#ov-cards{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; background:var(--border); border:1px solid var(--border); min-width:480px; }
+#ov-cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border:1px solid var(--border); width:min(520px,92vw); }
 .ov-card{ background:var(--panel); padding:16px 22px; display:flex; flex-direction:column; gap:4px; }
 .ov-card-lbl{ font-size:.58rem; letter-spacing:.15em; color:var(--dim); text-transform:uppercase; }
-.ov-card-val{ font-size:1.25rem; font-weight:700; color:#fff; }
+.ov-card-val{ font-size:clamp(.9rem,3vw,1.25rem); font-weight:700; color:#fff; }
 .ov-card-val.green{ color:var(--green); }
 .ov-card-val.red{ color:var(--red); }
 .ov-card-val.gold{ color:var(--gold); }
-#ov-result{ font-size:3rem; font-weight:700; letter-spacing:.1em; text-shadow:0 0 60px currentColor; }
+#ov-result{ font-size:clamp(2rem,8vw,3.5rem); font-weight:700; letter-spacing:.1em; text-shadow:0 0 60px currentColor; }
 #ov-result.green{ color:var(--green); }
 #ov-result.red{ color:var(--red); }
 #ov-btn{ font-family:'IBM Plex Mono',monospace; font-size:.85rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; background:var(--gold); color:#000; border:none; padding:14px 44px; border-radius:3px; cursor:pointer; transition:transform .1s,opacity .1s; margin-top:8px; }
@@ -113,7 +117,6 @@ canvas{ display:block; width:100%; height:100%; }
   <div class="hud-cell"><span class="hud-lbl">Balance</span><span class="hud-val" id="hBalance">$100.00</span></div>
   <div class="hud-cell"><span class="hud-lbl">Round P&amp;L</span><span class="hud-val" id="hRoundPnl">—</span></div>
   <div class="hud-cell"><span class="hud-lbl">Session P&amp;L</span><span class="hud-val" id="hPnl">—</span></div>
-  <div class="hud-cell"><span class="hud-lbl">Session P&amp;L Short</span><span class="hud-val" id="hPnlShort">—</span></div>
   <div class="hud-cell"><span class="hud-lbl">Goal Progress</span><span class="hud-val" id="hGoalPct">—</span></div>
   <div class="hud-cell"><span class="hud-lbl">Open P&amp;L</span><span class="hud-val" id="hOpen">—</span></div>
   <div class="hud-cell"><span class="hud-lbl">Session Time</span><span class="hud-val" id="hSessionTime">00:00</span></div>
@@ -149,13 +152,23 @@ canvas{ display:block; width:100%; height:100%; }
     <div class="ov-card"><span class="ov-card-lbl">Next Stock</span><span class="ov-card-val gold" id="ov-stock">—</span></div>
     <div class="ov-card"><span class="ov-card-lbl">Round</span><span class="ov-card-val" id="ov-round">1</span></div>
   </div>
-  <div id="ov-goal-row" style="display:flex;align-items:center;gap:12px;margin-top:4px;">
-    <span style="font-size:.62rem;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;">Profit Goal $</span>
-    <input id="ov-goal-input" type="number" min="0" step="1" placeholder="e.g. 50"
-      style="font-family:'IBM Plex Mono',monospace;font-size:.9rem;font-weight:700;
-             background:#111827;border:1px solid var(--border);color:#fff;
-             padding:6px 12px;border-radius:3px;width:130px;outline:none;text-align:right;"
-      onclick="event.stopPropagation()"/>
+  <div id="ov-goal-row" style="display:flex;flex-direction:column;gap:12px;margin-top:4px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:.62rem;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;white-space:nowrap;">Starting Balance $</span>
+      <input id="ov-balance-input" type="text" inputmode="decimal" placeholder="100.00"
+        style="font-family:'IBM Plex Mono',monospace;font-size:.9rem;font-weight:700;
+               background:#111827;border:1px solid var(--border);color:var(--gold);
+               padding:6px 12px;border-radius:3px;width:160px;outline:none;text-align:right;"
+        onclick="event.stopPropagation()"/>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:.62rem;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;white-space:nowrap;">Profit Goal $</span>
+      <input id="ov-goal-input" type="text" inputmode="decimal" placeholder="e.g. 50.00"
+        style="font-family:'IBM Plex Mono',monospace;font-size:.9rem;font-weight:700;
+               background:#111827;border:1px solid var(--border);color:#fff;
+               padding:6px 12px;border-radius:3px;width:160px;outline:none;text-align:right;"
+        onclick="event.stopPropagation()"/>
+    </div>
   </div>
   <button id="ov-btn">START ROUND 1</button>
   <div id="ov-click-hint">CLICK ANYWHERE TO BEGIN</div>
@@ -166,7 +179,7 @@ canvas{ display:block; width:100%; height:100%; }
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 const fmt    = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const fmtS   = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+const fmtS   = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1});
 const signed  = n => (n>=0?'+':'-') + fmt(n);
 const signedPct = n => (n>=0?'+':'') + n.toFixed(2) + '%';
 // Short format: 1.23T, 456B, 6.1MM, 123K
@@ -184,7 +197,7 @@ function hexRgb(h){ return `${parseInt(h.slice(1,3),16)},${parseInt(h.slice(3,5)
 function fmtDate(str){
   if(!str) return '';
   const d = new Date(str+'T12:00:00');
-  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
+  return d.toLocaleDateString('en-US',{month:'short',year:'numeric'}); // e.g. Jan 2022
 }
 
 // ─── CSV PARSER ──────────────────────────────────────────────────────────────
@@ -427,7 +440,8 @@ function drawMain(){
   mCtx.strokeStyle='rgba(255,255,255,0.08)';
   mCtx.beginPath(); mCtx.moveTo(0,padT+cH); mCtx.lineTo(cW,padT+cH); mCtx.stroke();
 
-  const pts=visible.map((p,i)=>({x:xOf(startSlot+i),y:yOf(p)}));
+  const clampY=y=>Math.max(clipTop,Math.min(clipBot,y));
+  const pts=visible.map((p,i)=>({x:xOf(startSlot+i),y:clampY(yOf(p))}));
   const last=pts[pts.length-1];
 
   // Fill
@@ -436,7 +450,7 @@ function drawMain(){
     if(i===0) mCtx.moveTo(pt.x,pt.y);
     else{ mCtx.lineTo(pt.x,pts[i-1].y); mCtx.lineTo(pt.x,pt.y); }
   });
-  mCtx.lineTo(last.x,clipBot); mCtx.lineTo(xOf(startSlot),clipBot); mCtx.closePath();
+  mCtx.lineTo(last.x,padT+cH); mCtx.lineTo(xOf(startSlot),padT+cH); mCtx.closePath();
   const g=mCtx.createLinearGradient(0,padT,0,clipBot);
   const rgb=hexRgb(holding?'#00e676':sc);
   g.addColorStop(0,`rgba(${rgb},0.15)`); g.addColorStop(1,'rgba(0,0,0,0)');
@@ -573,7 +587,7 @@ function updateTimer(){
 function updateHUD(){
   const cur=revealed>0?PRICES[revealed-1]:null;
   const prev=revealed>1?PRICES[revealed-2]:null;
-  document.getElementById('hBalance').textContent=fmt(balance);
+  document.getElementById('hBalance').textContent=fmtShort(balance).replace(/^[+-]/,'');
   document.getElementById('hRound').textContent=roundNum;
   document.getElementById('hStock').textContent=currentSym;
   document.getElementById('stockTag').textContent=currentSym;
@@ -600,16 +614,11 @@ function updateHUD(){
   pnlEl.textContent=totalPnL!==0?signed(totalPnL):'—';
   pnlEl.className='hud-val '+(totalPnL>0?'green':totalPnL<0?'red':'');
 
-  // Session P&L short format
-  const pnlSEl=document.getElementById('hPnlShort');
-  pnlSEl.textContent=totalPnL!==0?fmtShort(totalPnL):'—';
-  pnlSEl.className='hud-val '+(totalPnL>0?'green':totalPnL<0?'red':'');
-
   // Goal progress
   const gEl=document.getElementById('hGoalPct');
   if(goalAmount>0){
     const gPct=(totalPnL/goalAmount)*100;
-    gEl.textContent=(gPct>=0?'+':'')+gPct.toFixed(1)+'% of goal';
+    gEl.textContent=(gPct>=0?'+':'')+gPct.toFixed(2)+'% of goal';
     gEl.className='hud-val '+(gPct>=100?'green':gPct>0?'':'red');
   } else {
     gEl.textContent='no goal set';
@@ -706,11 +715,25 @@ function showOverlay(isFirst,roundPnL){
 
 function hideOverlay(){ overlay.classList.remove('show'); }
 
+function parseInputNum(id){
+  // Parse number from text input — strips commas, spaces
+  const raw=(document.getElementById(id).value||'').replace(/,/g,'').replace(/\s/g,'');
+  const v=parseFloat(raw);
+  return isNaN(v)?null:v;
+}
 function startFromOverlay(){
-  // Read goal amount on first round start
-  const inp=document.getElementById('ov-goal-input');
-  const v=parseFloat(inp.value);
-  if(!isNaN(v)&&v>0) goalAmount=v;
+  // Read starting balance (first round only)
+  if(roundNum===0){
+    const b=parseInputNum('ov-balance-input');
+    if(b!=null&&b>=0.01&&b<=1000000){
+      balance=Math.round(b*100)/100;
+      equityCurve=[balance];
+      balanceAtRoundStart=balance;
+    }
+  }
+  // Read goal
+  const g=parseInputNum('ov-goal-input');
+  if(g!=null&&g>0) goalAmount=g;
   hideOverlay();
   startRound();
 }
