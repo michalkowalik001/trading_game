@@ -53,10 +53,10 @@ html,body{
 #timerPill.urgent{background:#dc2626;animation:pulse .5s ease-in-out infinite alternate;}
 @keyframes pulse{from{opacity:1}to{opacity:.6}}
 .ctrl-btn{
-  font-family:'IBM Plex Mono',monospace;font-size:.7rem;font-weight:700;
-  letter-spacing:.08em;color:#fff;background:rgba(255,255,255,.08);
-  border:1px solid var(--border);padding:4px 10px;border-radius:3px;
-  cursor:pointer;white-space:nowrap;touch-action:manipulation;
+  font-family:'IBM Plex Mono',monospace;font-weight:700;
+  letter-spacing:.06em;color:#fff;background:rgba(255,255,255,.08);
+  border:1px solid var(--border);padding:3px 7px;border-radius:3px;
+  cursor:pointer;white-space:nowrap;touch-action:manipulation;font-size:.62rem;
 }
 .ctrl-btn:active{background:rgba(255,255,255,.2);}
 #pauseBtn.paused{background:rgba(255,196,0,.15);border-color:var(--gold);color:var(--gold);}
@@ -64,17 +64,23 @@ html,body{
 /* ── HUD ── */
 #hud{
   flex:0 0 auto;
-  display:flex;border-bottom:1px solid var(--border);
-  background:var(--panel);overflow-x:auto;scrollbar-width:none;
+  display:flex;flex-direction:column;
+  border-bottom:1px solid var(--border);
+  background:var(--panel);
 }
-#hud::-webkit-scrollbar{display:none;}
+.hud-row{
+  display:flex;overflow-x:auto;scrollbar-width:none;
+  border-bottom:1px solid var(--border);
+}
+.hud-row:last-child{border-bottom:none;}
+.hud-row::-webkit-scrollbar{display:none;}
 .hud-cell{
-  padding:5px 12px;border-right:1px solid var(--border);
+  padding:4px 10px;border-right:1px solid var(--border);
   display:flex;flex-direction:column;gap:1px;flex-shrink:0;
 }
 .hud-cell:last-child{border-right:none;}
-.hud-lbl{font-size:.52rem;letter-spacing:.12em;color:var(--dim);text-transform:uppercase;white-space:nowrap;}
-.hud-val{font-size:.82rem;font-weight:700;color:#fff;white-space:nowrap;}
+.hud-lbl{font-size:.48rem;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;white-space:nowrap;}
+.hud-val{font-size:.76rem;font-weight:700;color:#fff;white-space:nowrap;}
 .hud-val.green{color:var(--green);}
 .hud-val.red{color:var(--red);}
 
@@ -85,11 +91,11 @@ html,body{
   min-height:0; /* critical for flex children to shrink */
 }
 #mainWrap{
-  flex:0 0 65%;
+  flex:0 0 72%;
   position:relative;overflow:hidden;min-height:0;
 }
 #equityWrap{
-  flex:0 0 35%;
+  flex:0 0 28%;
   position:relative;overflow:hidden;min-height:0;
   border-top:1px solid var(--border);
 }
@@ -140,7 +146,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 #ov-logo{font-size:clamp(2rem,8vw,3.5rem);font-weight:700;letter-spacing:.4em;color:var(--gold);text-shadow:0 0 40px rgba(255,196,0,.4);}
 #ov-title{font-size:clamp(1.1rem,4vw,1.8rem);font-weight:700;letter-spacing:.25em;color:#fff;text-transform:uppercase;text-align:center;}
 #ov-subtitle{font-size:.78rem;color:var(--dim);letter-spacing:.1em;text-align:center;}
-#ov-result{font-size:clamp(2.5rem,10vw,5rem);font-weight:700;letter-spacing:.1em;text-shadow:0 0 60px currentColor;}
+#ov-result{font-size:clamp(1.8rem,7vw,3.2rem);font-weight:700;letter-spacing:.1em;text-shadow:0 0 60px currentColor;}
 #ov-result.green{color:var(--green);}
 #ov-result.red{color:var(--red);}
 
@@ -171,7 +177,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 #ov-balance-input{color:var(--gold);}
 
 /* challenges — compact list */
-#ov-challenges{display:flex;flex-direction:column;gap:8px;width:min(400px,90vw);}
+#ov-challenges{display:flex;flex-direction:column;gap:8px;width:min(400px,90vw);max-height:240px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 .challenge-lbl{font-size:.62rem;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;}
 #challengesList{display:flex;flex-direction:column;gap:4px;}
 .ch-btn{
@@ -206,6 +212,18 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 }
 #ov-play-btn:active{background:#111827;color:#fff;}
 #ov-click-hint{font-size:.58rem;color:#2a3a50;letter-spacing:.1em;}
+
+/* GOAL TOAST */
+#goalToast{
+  position:fixed;top:60px;left:50%;transform:translateX(-50%);
+  z-index:150;background:var(--gold);color:#000;
+  font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:1rem;
+  letter-spacing:.15em;padding:12px 28px;border-radius:4px;
+  text-align:center;opacity:0;pointer-events:none;
+  transition:opacity .3s;white-space:nowrap;
+  box-shadow:0 0 40px rgba(255,196,0,.6);
+}
+#goalToast.show{opacity:1;}
 
 /* LOADING */
 #loading{
@@ -247,17 +265,21 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
     </div>
   </div>
 
-  <!-- HUD -->
+  <!-- HUD: two scrollable rows -->
   <div id="hud">
-    <div class="hud-cell"><span class="hud-lbl">Balance</span><span class="hud-val" id="hBalance">—</span></div>
-    <div class="hud-cell"><span class="hud-lbl">Balance Short</span><span class="hud-val" id="hBalanceShort">—</span></div>
-    <div class="hud-cell"><span class="hud-lbl">Round P&amp;L</span><span class="hud-val" id="hRoundPnl">—</span></div>
-    <div class="hud-cell"><span class="hud-lbl">Session P&amp;L</span><span class="hud-val" id="hPnl">—</span></div>
-    <div class="hud-cell"><span class="hud-lbl">Goal Progress</span><span class="hud-val" id="hGoalPct">—</span></div>
-    <div class="hud-cell"><span class="hud-lbl">Open P&amp;L</span><span class="hud-val" id="hOpen">—</span></div>
-    <div class="hud-cell"><span class="hud-lbl">Time</span><span class="hud-val" id="hSessionTime">00:00</span></div>
-    <div class="hud-cell"><span class="hud-lbl">Round</span><span class="hud-val" id="hRound">—</span></div>
-    <div class="hud-cell"><span class="hud-lbl">Stock</span><span class="hud-val" id="hStock" style="color:var(--gold)">—</span></div>
+    <div class="hud-row">
+      <div class="hud-cell"><span class="hud-lbl">Balance</span><span class="hud-val" id="hBalance">—</span></div>
+      <div class="hud-cell"><span class="hud-lbl">Bal. Short</span><span class="hud-val" id="hBalanceShort">—</span></div>
+      <div class="hud-cell"><span class="hud-lbl">Round P&amp;L</span><span class="hud-val" id="hRoundPnl">—</span></div>
+      <div class="hud-cell"><span class="hud-lbl">Session P&amp;L</span><span class="hud-val" id="hPnl">—</span></div>
+      <div class="hud-cell"><span class="hud-lbl">Goal Progress</span><span class="hud-val" id="hGoalPct">—</span></div>
+    </div>
+    <div class="hud-row">
+      <div class="hud-cell"><span class="hud-lbl">Open P&amp;L</span><span class="hud-val" id="hOpen">—</span></div>
+      <div class="hud-cell"><span class="hud-lbl">Time</span><span class="hud-val" id="hSessionTime">00:00</span></div>
+      <div class="hud-cell"><span class="hud-lbl">Round</span><span class="hud-val" id="hRound">—</span></div>
+      <div class="hud-cell"><span class="hud-lbl">Stock</span><span class="hud-val" id="hStock" style="color:var(--gold)">—</span></div>
+    </div>
   </div>
 
   <!-- CHARTS -->
@@ -277,6 +299,9 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 
 </div><!-- /app -->
 
+<!-- GOAL TOAST -->
+<div id="goalToast">🎉 GOAL REACHED!</div>
+
 <!-- PAUSE SCREEN -->
 <div id="pauseScreen">
   <h2>PAUSED</h2>
@@ -287,7 +312,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 <div id="overlay" class="show">
   <div id="ov-logo">TRADER</div>
   <div id="ov-title">READY TO TRADE</div>
-  <div id="ov-subtitle">Set your goal and start</div>
+  <div id="ov-subtitle">Set your goal — or just play</div>
   <div id="ov-result" style="display:none"></div>
 
   <!-- Stats grid (after round 1) -->
@@ -307,22 +332,22 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
       <input class="setup-input" id="ov-balance-input" type="text" inputmode="decimal" placeholder="100" onclick="event.stopPropagation()"/>
     </div>
     <div class="setup-row">
-      <span class="setup-lbl">Profit Goal $</span>
-      <input class="setup-input" id="ov-goal-input" type="text" inputmode="decimal" placeholder="100" onclick="event.stopPropagation()"/>
+      <span class="setup-lbl">Balance Goal $</span>
+      <input class="setup-input" id="ov-goal-input" type="text" inputmode="decimal" placeholder="200.00" onclick="event.stopPropagation()"/>
     </div>
   </div>
 
-  <!-- Challenges list (first round) -->
-  <div id="ov-challenges">
-    <div class="challenge-lbl">— OR PICK A CHALLENGE —</div>
-    <div id="challengesList"></div>
-  </div>
-
-  <!-- Buttons -->
+  <!-- Buttons (below subtitle on first screen) -->
   <div id="ov-buttons">
     <button id="ov-btn" onclick="event.stopPropagation();startFromOverlay()">START ROUND 1</button>
     <button id="ov-play-btn" onclick="event.stopPropagation();quickPlay()" style="display:none">▶ JUST PLAY (no goal)</button>
     <div id="ov-click-hint">TAP ANYWHERE TO BEGIN</div>
+  </div>
+
+  <!-- Challenges list (first round) — scrollable -->
+  <div id="ov-challenges">
+    <div class="challenge-lbl">— OR PICK A CHALLENGE —</div>
+    <div id="challengesList"></div>
   </div>
 </div>
 
@@ -345,7 +370,12 @@ const CHALLENGES = [
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 const fmt = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtFull = n => { const sign=n<0?'-':''; return sign+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
-const fmtS = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1});
+function fmtS(n){
+  const a=Math.abs(n);
+  // If value has 2+ digits before decimal, show 0 decimals; else 1 decimal
+  const decimals=a>=10?0:1;
+  return '$'+a.toLocaleString('en-US',{minimumFractionDigits:decimals,maximumFractionDigits:decimals});
+}
 const signed = n => (n>=0?'+':'-') + fmt(n);
 const signedPct = n => (n>=0?'+':'') + n.toFixed(2) + '%';
 
@@ -451,7 +481,7 @@ let holding=false, entryPrice=null, entryIdx=null;
 let revealed=0, roundStart=null, running=false, paused=false;
 let currentSym='', PRICES=[], DATES=[], equityCurve=[100];
 let balanceAtRoundStart=100, tickHandle=null;
-let goalAmount=0;
+let goalAmount=0, goalToastShown=false;
 let sessionStart=null, sessionTimerHandle=null;
 let pauseStart=null, totalPauseMs=0;
 
@@ -519,7 +549,7 @@ function drawMain(){
   const vdates=allDates.slice(Math.max(0,allDates.length-VISIBLE));
 
   const clipTop=h*0.10, clipBot=h*0.90, clipH=clipBot-clipTop;
-  const padR=62, padB=28;
+  const padR=62, padB=22;
   const cW=w-padR, padT=clipTop, cH=clipH-padB;
 
   const minP=Math.min(...visible), maxP=Math.max(...visible);
@@ -600,11 +630,11 @@ function drawMain(){
   }
 
   // X date labels
-  mCtx.fillStyle='#8899aa'; mCtx.font='600 10px IBM Plex Mono,monospace'; mCtx.textAlign='center';
+  mCtx.fillStyle='#8899aa'; mCtx.font='600 8px IBM Plex Mono,monospace'; mCtx.textAlign='center';
   const labelEvery=Math.max(5,Math.round(VISIBLE/8));
   vdates.forEach((d,i)=>{
     if(i%labelEvery===0||i===vdates.length-1)
-      mCtx.fillText(fmtDate(d),xOf(startSlot+i),clipBot+20);
+      mCtx.fillText(fmtDate(d),xOf(startSlot+i),clipBot+16);
   });
 
   const dotY=clampY(last.y);
@@ -711,9 +741,10 @@ function updateHUD(){
 
   const gEl=document.getElementById('hGoalPct');
   if(goalAmount>0){
-    const gPct=(totalPnL/goalAmount)*100;
-    gEl.textContent=(gPct>=0?'+':'')+gPct.toFixed(2)+'% of goal';
-    gEl.className='hud-val '+(gPct>=100?'green':gPct>0?'':'red');
+    const gPct=(balance/goalAmount)*100;
+    gEl.textContent=gPct.toFixed(2)+'% of goal';
+    gEl.className='hud-val '+(gPct>=100?'green':gPct>=50?'':'red');
+    if(gPct>=100&&!goalToastShown){ goalToastShown=true; showGoalToast(); }
   }else{ gEl.textContent='no goal'; gEl.className='hud-val'; }
 
   const oEl=document.getElementById('hOpen');
@@ -724,6 +755,12 @@ function updateHUD(){
   }else{ oEl.textContent='—'; oEl.className='hud-val'; }
 
   updateSessionTimer();
+}
+
+function showGoalToast(){
+  const t=document.getElementById('goalToast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),4000);
 }
 
 function flashLabel(text,color){
@@ -790,7 +827,7 @@ function goToMenu(e){
   clearTimeout(tickHandle); clearInterval(sessionTimerHandle);
   if(holding) sell();
   balance=100; initialBalance=100; totalPnL=0; roundNum=0;
-  equityCurve=[100]; goalAmount=0; currentSym='';
+  equityCurve=[100]; goalAmount=0; goalToastShown=false; currentSym='';
   sessionStart=null; totalPauseMs=0;
   document.getElementById('pauseScreen').classList.remove('show');
   document.getElementById('pauseBtn').textContent='⏸ PAUSE';
@@ -846,9 +883,9 @@ function showOverlay(isFirst,roundPnL){
 
     const gEl=document.getElementById('ov-goalpct');
     if(goalAmount>0){
-      const gPct=(totalPnL/goalAmount)*100;
-      gEl.textContent=(gPct>=0?'+':'')+gPct.toFixed(2)+'%';
-      gEl.className='ov-card-val '+(gPct>=100?'green':gPct>0?'':'red');
+      const gPct=(balance/goalAmount)*100;
+      gEl.textContent=gPct.toFixed(2)+'% of goal';
+      gEl.className='ov-card-val '+(gPct>=100?'green':gPct>50?'':'red');
     }else{ gEl.textContent='—'; gEl.className='ov-card-val'; }
 
     pickNextStock();
@@ -870,7 +907,7 @@ function startFromOverlay(){
       equityCurve=[balance];
     }
     const g=parseInputNum('ov-goal-input');
-    if(g!=null&&g>0) goalAmount=g;
+    if(g!=null&&g>balance) goalAmount=g; // goal = target balance, must be > starting balance
     pickNextStock();
   }
   hideOverlay();
@@ -897,7 +934,7 @@ function buildChallenges(){
   CHALLENGES.forEach(ch=>{
     const btn=document.createElement('button');
     btn.className='ch-btn';
-    btn.innerHTML=`<span class="ch-name">${ch.name}</span><span class="ch-goal">Goal ${ch.label} · Start ${fmtShort(ch.balance)}</span>`;
+    btn.innerHTML=`<span class="ch-name">${ch.name}</span><span class="ch-goal">Reach ${ch.label} · Start ${fmtShort(ch.balance)}</span>`;
     btn.addEventListener('click',e=>{
       e.stopPropagation();
       document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('selected'));
