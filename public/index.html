@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="theme-color" content="#080a0e">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>TRADER</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -12,18 +14,22 @@
   --green:#00e676; --red:#ff1744; --gold:#ffc400;
   --text:#f0f4ff; --dim:#4a5a70;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;overflow:hidden;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{height:100%;height:-webkit-fill-available;}
 body{
   background:var(--bg); font-family:'IBM Plex Mono',monospace;
-  display:flex; flex-direction:column;
-  user-select:none; cursor:crosshair; color:var(--text);
-  touch-action:none; -webkit-tap-highlight-color:transparent;
+  display:flex; flex-direction:column; height:100vh;
+  height:-webkit-fill-available; overflow:hidden;
+  user-select:none; touch-action:none;
+  color:var(--text); cursor:crosshair;
 }
+
+/* ── TOP BAR ── */
 #topbar{
-  height:40px; background:var(--panel); border-bottom:1px solid var(--border);
+  height:44px; background:var(--panel); border-bottom:1px solid var(--border);
   display:flex; align-items:center; justify-content:space-between;
-  padding:0 16px; flex-shrink:0; position:relative; z-index:10;
+  padding:0 10px; flex-shrink:0; position:relative; z-index:10;
+  padding-top:env(safe-area-inset-top);
 }
 #timerFill{
   position:absolute; left:0; top:0; bottom:0;
@@ -31,99 +37,193 @@ body{
   pointer-events:none; opacity:.7; transition:width .15s linear;
 }
 #timerFill.urgent{ background:linear-gradient(90deg,#700,#f00,#ff6060); opacity:.9; }
-#stockBadge{ position:relative; z-index:2; display:flex; align-items:center; gap:10px; }
-#stockTag{ font-size:.85rem; font-weight:700; background:var(--gold); color:#000; padding:3px 9px; border-radius:3px; letter-spacing:.05em; }
-#stockFullName{ font-size:.78rem; color:#8899aa; display:none; }
-@media(min-width:600px){ #stockFullName{ display:inline; } }
-#livePrice{ font-size:.92rem; font-weight:700; color:#fff; margin-left:4px; }
-#livePriceDelta{ font-size:.75rem; font-weight:600; margin-left:4px; }
+#stockBadge{ position:relative; z-index:2; display:flex; align-items:center; gap:8px; }
+#stockTag{ font-size:.82rem; font-weight:700; background:var(--gold); color:#000; padding:2px 8px; border-radius:3px; letter-spacing:.05em; }
+#livePrice{ font-size:.88rem; font-weight:700; color:#fff; }
+#livePriceDelta{ font-size:.72rem; font-weight:600; }
+#topRight{ position:relative; z-index:2; display:flex; align-items:center; gap:6px; }
 #timerPill{
-  position:relative; z-index:2; font-size:.85rem; font-weight:700; color:#fff;
-  background:#991b1b; padding:3px 12px; border-radius:3px; min-width:40px; text-align:center;
+  font-size:.82rem; font-weight:700; color:#fff;
+  background:#991b1b; padding:2px 10px; border-radius:3px; min-width:36px; text-align:center;
 }
 #timerPill.urgent{ background:#dc2626; animation:pulse .5s ease-in-out infinite alternate; }
 @keyframes pulse{ from{opacity:1} to{opacity:.6} }
-#hud{ display:flex; flex-shrink:0; border-bottom:1px solid var(--border); background:var(--panel); overflow-x:auto; scrollbar-width:none; }
+
+/* pause + menu buttons */
+.ctrl-btn{
+  font-family:'IBM Plex Mono',monospace; font-size:.7rem; font-weight:700;
+  letter-spacing:.1em; color:#fff; background:rgba(255,255,255,.08);
+  border:1px solid var(--border); padding:3px 9px; border-radius:3px;
+  cursor:pointer; transition:background .1s; white-space:nowrap;
+  touch-action:manipulation;
+}
+.ctrl-btn:active{ background:rgba(255,255,255,.18); }
+#pauseBtn.paused{ background:rgba(255,196,0,.15); border-color:var(--gold); color:var(--gold); }
+
+/* ── HUD ── */
+#hud{
+  display:flex; flex-shrink:0; border-bottom:1px solid var(--border);
+  background:var(--panel); overflow-x:auto; scrollbar-width:none;
+}
 #hud::-webkit-scrollbar{ display:none; }
-.hud-cell{ padding:6px 14px; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:2px; min-width:0; flex-shrink:0; }
-.hud-cell:last-child{ border-right:none; margin-left:auto; }
-.hud-lbl{ font-size:.58rem; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; white-space:nowrap; }
-.hud-val{ font-size:.88rem; font-weight:700; color:#fff; white-space:nowrap; }
+.hud-cell{
+  padding:5px 12px; border-right:1px solid var(--border);
+  display:flex; flex-direction:column; gap:1px; flex-shrink:0;
+}
+.hud-cell:last-child{ border-right:none; }
+.hud-lbl{ font-size:.52rem; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; white-space:nowrap; }
+.hud-val{ font-size:.82rem; font-weight:700; color:#fff; white-space:nowrap; }
 .hud-val.green{ color:var(--green); }
 .hud-val.red{ color:var(--red); }
+
+/* ── CHARTS ── */
 .main{ flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
 .charts{ flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
 .chart-wrap{ position:relative; overflow:hidden; min-height:0; }
 #mainWrap{ flex:0 0 65%; }
 #equityWrap{ flex:0 0 35%; border-top:1px solid var(--border); }
 canvas{ display:block; width:100%; height:100%; }
-.chart-label{ position:absolute; top:7px; left:14px; font-size:.65rem; font-weight:600; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; pointer-events:none; }
-#tradeFlash{ position:absolute; top:35%; left:50%; transform:translate(-50%,-50%); font-size:clamp(1.2rem,6vw,2.2rem); font-weight:700; letter-spacing:.2em; opacity:0; pointer-events:none; transition:opacity .08s; z-index:20; text-shadow:0 0 50px currentColor; }
-#holdingBar{ position:absolute; bottom:42px; left:50%; transform:translateX(-50%); font-size:.7rem; font-weight:700; letter-spacing:.15em; padding:4px 14px; border-radius:2px; background:rgba(0,230,118,.15); border:1px solid var(--green); color:var(--green); opacity:0; pointer-events:none; transition:opacity .2s; z-index:15; }
+.chart-label{ position:absolute; top:6px; left:10px; font-size:.6rem; font-weight:600; letter-spacing:.08em; color:var(--dim); text-transform:uppercase; pointer-events:none; }
+#tradeFlash{ position:absolute; top:35%; left:50%; transform:translate(-50%,-50%); font-size:clamp(1.3rem,6vw,2.4rem); font-weight:700; letter-spacing:.2em; opacity:0; pointer-events:none; transition:opacity .08s; z-index:20; text-shadow:0 0 50px currentColor; }
+#holdingBar{ position:absolute; bottom:38px; left:50%; transform:translateX(-50%); font-size:.65rem; font-weight:700; letter-spacing:.12em; padding:3px 12px; border-radius:2px; background:rgba(0,230,118,.12); border:1px solid var(--green); color:var(--green); opacity:0; pointer-events:none; transition:opacity .2s; z-index:15; white-space:nowrap; }
 #holdingBar.show{ opacity:1; }
-#hint{ position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:.55rem; letter-spacing:.12em; color:#243040; pointer-events:none; z-index:10; white-space:nowrap; }
-#overlay{ position:fixed; inset:0; z-index:100; background:rgba(4,6,10,.94); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; opacity:0; pointer-events:none; transition:opacity .3s; }
+#hint{ position:absolute; bottom:8px; left:50%; transform:translateX(-50%); font-size:.52rem; letter-spacing:.12em; color:#1e2d3d; pointer-events:none; z-index:10; white-space:nowrap; }
+
+/* ── PAUSE OVERLAY ── */
+#pauseScreen{
+  position:fixed; inset:0; z-index:80; background:rgba(4,6,10,.85);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+  opacity:0; pointer-events:none; transition:opacity .2s;
+}
+#pauseScreen.show{ opacity:1; pointer-events:all; }
+#pauseScreen h2{ font-size:clamp(1.2rem,5vw,2rem); letter-spacing:.3em; color:#fff; }
+#pauseScreen p{ font-size:.7rem; color:var(--dim); letter-spacing:.1em; }
+
+/* ── MAIN OVERLAY ── */
+#overlay{
+  position:fixed; inset:0; z-index:100; background:rgba(4,6,10,.95);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:16px; opacity:0; pointer-events:none; transition:opacity .3s;
+  overflow-y:auto; padding:20px 12px;
+}
 #overlay.show{ opacity:1; pointer-events:all; }
-#ov-title{ font-size:clamp(.9rem,4vw,1.4rem); font-weight:700; letter-spacing:.2em; color:#fff; text-transform:uppercase; }
-#ov-subtitle{ font-size:.72rem; color:var(--dim); letter-spacing:.1em; }
-#ov-cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border:1px solid var(--border); width:min(520px,92vw); }
-.ov-card{ background:var(--panel); padding:16px 22px; display:flex; flex-direction:column; gap:4px; }
-.ov-card-lbl{ font-size:.58rem; letter-spacing:.15em; color:var(--dim); text-transform:uppercase; }
-.ov-card-val{ font-size:clamp(.9rem,3vw,1.25rem); font-weight:700; color:#fff; }
+#ov-title{ font-size:clamp(.9rem,4vw,1.5rem); font-weight:700; letter-spacing:.25em; color:#fff; text-transform:uppercase; text-align:center; }
+#ov-subtitle{ font-size:.68rem; color:var(--dim); letter-spacing:.1em; text-align:center; }
+#ov-result{ font-size:clamp(2rem,9vw,4rem); font-weight:700; letter-spacing:.1em; text-shadow:0 0 60px currentColor; }
+#ov-result.green{ color:var(--green); }
+#ov-result.red{ color:var(--red); }
+
+/* stats grid */
+#ov-cards{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+  background:var(--border); border:1px solid var(--border);
+  width:min(520px,94vw);
+}
+.ov-card{ background:var(--panel); padding:12px 16px; display:flex; flex-direction:column; gap:3px; }
+.ov-card-lbl{ font-size:.52rem; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; }
+.ov-card-val{ font-size:clamp(.85rem,2.5vw,1.2rem); font-weight:700; color:#fff; }
 .ov-card-val.green{ color:var(--green); }
 .ov-card-val.red{ color:var(--red); }
 .ov-card-val.gold{ color:var(--gold); }
-#ov-result{ font-size:clamp(2rem,8vw,3.5rem); font-weight:700; letter-spacing:.1em; text-shadow:0 0 60px currentColor; }
-#ov-result.green{ color:var(--green); }
-#ov-result.red{ color:var(--red); }
-#ov-btn{ font-family:'IBM Plex Mono',monospace; font-size:.85rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; background:var(--gold); color:#000; border:none; padding:14px 44px; border-radius:3px; cursor:pointer; transition:transform .1s,opacity .1s; margin-top:8px; }
-#ov-btn:hover{ opacity:.85; transform:scale(1.02); }
-#ov-click-hint{ font-size:.58rem; color:var(--dim); letter-spacing:.1em; }
 
-/* GOAL INPUT */
-#ov-goal-input::-webkit-inner-spin-button{ opacity:.4; }
-#ov-goal-input:focus{ border-color:var(--gold); }
+/* setup fields */
+#ov-setup{
+  display:flex; flex-direction:column; gap:10px;
+  width:min(400px,90vw);
+}
+.setup-row{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.setup-lbl{ font-size:.6rem; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; white-space:nowrap; flex-shrink:0; }
+.setup-input{
+  font-family:'IBM Plex Mono',monospace; font-size:1rem; font-weight:700;
+  background:#111827; border:1px solid var(--border); color:#fff;
+  padding:8px 14px; border-radius:3px; width:180px; outline:none; text-align:right;
+  touch-action:manipulation;
+}
+.setup-input:focus{ border-color:var(--gold); }
+#ov-balance-input{ color:var(--gold); }
 
-/* LOADING SCREEN */
+/* challenges */
+#ov-challenges{
+  width:min(520px,94vw);
+  display:flex; flex-direction:column; gap:6px;
+}
+.challenge-lbl{ font-size:.58rem; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; margin-bottom:2px; }
+.challenges-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:6px; }
+@media(min-width:480px){ .challenges-grid{ grid-template-columns:repeat(3,1fr); } }
+.ch-btn{
+  font-family:'IBM Plex Mono',monospace; font-size:.62rem; font-weight:700;
+  background:var(--panel); border:1px solid var(--border); color:var(--text);
+  padding:8px 10px; border-radius:3px; cursor:pointer; text-align:left;
+  transition:border-color .1s, background .1s; touch-action:manipulation;
+  display:flex; flex-direction:column; gap:2px;
+}
+.ch-btn:active{ background:#1a2235; }
+.ch-btn.selected{ border-color:var(--gold); background:rgba(255,196,0,.08); }
+.ch-name{ color:var(--gold); letter-spacing:.06em; }
+.ch-goal{ color:var(--dim); font-size:.55rem; }
+
+/* main button */
+#ov-btn{
+  font-family:'IBM Plex Mono',monospace; font-size:.85rem; font-weight:700;
+  letter-spacing:.15em; text-transform:uppercase;
+  background:var(--gold); color:#000; border:none;
+  padding:14px 44px; border-radius:3px; cursor:pointer;
+  transition:transform .1s, opacity .1s;
+  touch-action:manipulation; min-width:200px; text-align:center;
+}
+#ov-btn:active{ opacity:.85; transform:scale(.98); }
+#ov-click-hint{ font-size:.56rem; color:var(--dim); letter-spacing:.1em; }
+
+/* LOADING */
 #loading{ position:fixed; inset:0; z-index:200; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
 #loading.hide{ display:none; }
-#loading-text{ font-size:.8rem; letter-spacing:.2em; color:var(--dim); }
+#loading-text{ font-size:.78rem; letter-spacing:.2em; color:var(--dim); }
 #loading-bar{ width:200px; height:2px; background:var(--border); border-radius:1px; overflow:hidden; }
 #loading-fill{ height:100%; background:var(--gold); width:0%; transition:width .2s; }
-#loading-error{ font-size:.75rem; color:var(--red); letter-spacing:.1em; max-width:400px; text-align:center; display:none; }
+#loading-error{ font-size:.72rem; color:var(--red); letter-spacing:.08em; max-width:340px; text-align:center; display:none; line-height:1.5; }
 </style>
 </head>
 <body>
 
+<!-- LOADING -->
 <div id="loading">
-  <div style="font-size:1.2rem;font-weight:700;letter-spacing:.3em;color:var(--gold)">TRADER</div>
+  <div style="font-size:1.3rem;font-weight:700;letter-spacing:.35em;color:var(--gold)">TRADER</div>
   <div id="loading-text">LOADING STOCKS...</div>
   <div id="loading-bar"><div id="loading-fill"></div></div>
   <div id="loading-error"></div>
 </div>
 
+<!-- TOP BAR -->
 <div id="topbar">
   <div id="timerFill" style="width:100%"></div>
   <div id="stockBadge">
     <span id="stockTag">—</span>
-    <span id="stockFullName">—</span>
     <span id="livePrice">—</span>
     <span id="livePriceDelta"></span>
   </div>
-  <span id="timerPill">30</span>
+  <div id="topRight">
+    <button class="ctrl-btn" id="pauseBtn" onclick="togglePause(event)">⏸ PAUSE</button>
+    <button class="ctrl-btn" id="menuBtn" onclick="goToMenu(event)">☰ MENU</button>
+    <span id="timerPill">30</span>
+  </div>
 </div>
 
+<!-- HUD -->
 <div id="hud">
-  <div class="hud-cell"><span class="hud-lbl">Balance</span><span class="hud-val" id="hBalance">$100.00</span></div>
+  <div class="hud-cell"><span class="hud-lbl">Balance</span><span class="hud-val" id="hBalance">—</span></div>
+  <div class="hud-cell"><span class="hud-lbl">Balance Short</span><span class="hud-val" id="hBalanceShort">—</span></div>
   <div class="hud-cell"><span class="hud-lbl">Round P&amp;L</span><span class="hud-val" id="hRoundPnl">—</span></div>
   <div class="hud-cell"><span class="hud-lbl">Session P&amp;L</span><span class="hud-val" id="hPnl">—</span></div>
   <div class="hud-cell"><span class="hud-lbl">Goal Progress</span><span class="hud-val" id="hGoalPct">—</span></div>
   <div class="hud-cell"><span class="hud-lbl">Open P&amp;L</span><span class="hud-val" id="hOpen">—</span></div>
-  <div class="hud-cell"><span class="hud-lbl">Session Time</span><span class="hud-val" id="hSessionTime">00:00</span></div>
+  <div class="hud-cell"><span class="hud-lbl">Time</span><span class="hud-val" id="hSessionTime">00:00</span></div>
   <div class="hud-cell"><span class="hud-lbl">Round</span><span class="hud-val" id="hRound">—</span></div>
   <div class="hud-cell"><span class="hud-lbl">Stock</span><span class="hud-val" id="hStock" style="color:var(--gold)">—</span></div>
 </div>
 
+<!-- CHARTS -->
 <div class="main">
   <div class="charts">
     <div class="chart-wrap" id="mainWrap">
@@ -131,7 +231,7 @@ canvas{ display:block; width:100%; height:100%; }
       <div class="chart-label" id="mainLabel">—</div>
       <div id="tradeFlash"></div>
       <div id="holdingBar">● LONG POSITION OPEN</div>
-      <div id="hint">HOLD TO BUY &nbsp;·&nbsp; RELEASE TO SELL</div>
+      <div id="hint">HOLD TO BUY · RELEASE TO SELL</div>
     </div>
     <div class="chart-wrap" id="equityWrap">
       <canvas id="equityChart"></canvas>
@@ -140,51 +240,79 @@ canvas{ display:block; width:100%; height:100%; }
   </div>
 </div>
 
+<!-- PAUSE SCREEN -->
+<div id="pauseScreen">
+  <h2>PAUSED</h2>
+  <p>TAP ANYWHERE TO RESUME</p>
+</div>
+
+<!-- MAIN OVERLAY -->
 <div id="overlay" class="show">
   <div id="ov-title">READY TO TRADE</div>
-  <div id="ov-subtitle">—</div>
+  <div id="ov-subtitle">Your capital is at risk</div>
   <div id="ov-result" style="display:none"></div>
-  <div id="ov-cards">
-    <div class="ov-card"><span class="ov-card-lbl">Balance</span><span class="ov-card-val" id="ov-balance">$100.00</span></div>
+
+  <!-- Stats (shown after round 1) -->
+  <div id="ov-cards" style="display:none">
+    <div class="ov-card"><span class="ov-card-lbl">Balance</span><span class="ov-card-val" id="ov-balance">—</span></div>
     <div class="ov-card"><span class="ov-card-lbl">Round P&amp;L</span><span class="ov-card-val" id="ov-roundpnl">—</span></div>
-    <div class="ov-card"><span class="ov-card-lbl">Total Return</span><span class="ov-card-val" id="ov-pct">—</span></div>
     <div class="ov-card"><span class="ov-card-lbl">Session P&amp;L</span><span class="ov-card-val" id="ov-pnl">—</span></div>
+    <div class="ov-card"><span class="ov-card-lbl">Goal Progress</span><span class="ov-card-val" id="ov-goalpct">—</span></div>
     <div class="ov-card"><span class="ov-card-lbl">Next Stock</span><span class="ov-card-val gold" id="ov-stock">—</span></div>
     <div class="ov-card"><span class="ov-card-lbl">Round</span><span class="ov-card-val" id="ov-round">1</span></div>
   </div>
-  <div id="ov-goal-row" style="display:flex;flex-direction:column;gap:12px;margin-top:4px;">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <span style="font-size:.62rem;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;white-space:nowrap;">Starting Balance $</span>
-      <input id="ov-balance-input" type="text" inputmode="decimal" placeholder="100.00"
-        style="font-family:'IBM Plex Mono',monospace;font-size:.9rem;font-weight:700;
-               background:#111827;border:1px solid var(--border);color:var(--gold);
-               padding:6px 12px;border-radius:3px;width:160px;outline:none;text-align:right;"
-        onclick="event.stopPropagation()"/>
+
+  <!-- Setup (first round only) -->
+  <div id="ov-setup">
+    <div class="setup-row">
+      <span class="setup-lbl">Starting Balance $</span>
+      <input class="setup-input" id="ov-balance-input" type="text" inputmode="decimal" placeholder="100" onclick="event.stopPropagation()"/>
     </div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <span style="font-size:.62rem;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;white-space:nowrap;">Profit Goal $</span>
-      <input id="ov-goal-input" type="text" inputmode="decimal" placeholder="e.g. 50.00"
-        style="font-family:'IBM Plex Mono',monospace;font-size:.9rem;font-weight:700;
-               background:#111827;border:1px solid var(--border);color:#fff;
-               padding:6px 12px;border-radius:3px;width:160px;outline:none;text-align:right;"
-        onclick="event.stopPropagation()"/>
+    <div class="setup-row">
+      <span class="setup-lbl">Profit Goal $</span>
+      <input class="setup-input" id="ov-goal-input" type="text" inputmode="decimal" placeholder="100" onclick="event.stopPropagation()"/>
     </div>
   </div>
-  <button id="ov-btn">START ROUND 1</button>
-  <div id="ov-click-hint">CLICK ANYWHERE TO BEGIN</div>
+
+  <!-- Challenges -->
+  <div id="ov-challenges">
+    <div class="challenge-lbl">— OR PICK A CHALLENGE —</div>
+    <div class="challenges-grid" id="challengesGrid"></div>
+  </div>
+
+  <button id="ov-btn" onclick="event.stopPropagation();startFromOverlay()">START ROUND 1</button>
+  <div id="ov-click-hint">TAP ANYWHERE TO BEGIN</div>
 </div>
 
 <script>
 'use strict';
 
-// ─── HELPERS ────────────────────────────────────────────────────────────────
-const fmt    = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const fmtS   = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1});
-const signed  = n => (n>=0?'+':'-') + fmt(n);
+// ─── CHALLENGES ──────────────────────────────────────────────────────────────
+const CHALLENGES = [
+  { name:'🇺🇸 US GDP',    goal:29000000000000, balance:100, label:'$29T' },
+  { name:'🇨🇳 China GDP', goal:18500000000000, balance:100, label:'$18.5T' },
+  { name:'🇩🇪 Germany GDP',goal:4600000000000, balance:100, label:'$4.6T' },
+  { name:'🇵🇱 Poland GDP', goal:880000000000,  balance:100, label:'$880B' },
+  { name:'🪙 Millionaire', goal:1000000,        balance:100, label:'$1MM' },
+  { name:'🚀 Moon Shot',   goal:1000000000,     balance:1,   label:'$1B from $1' },
+  { name:'💼 Hedge Fund',  goal:10000000000,    balance:10000, label:'$10B from $10K' },
+  { name:'⚡ Quick Flip',  goal:200,            balance:100, label:'+100% fast' },
+  { name:'🏦 Billionaire', goal:1000000000,     balance:100, label:'$1B' },
+];
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const fmt = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtFull = n => {
+  const sign = n < 0 ? '-' : '';
+  return sign + '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+};
+// Y-axis: 1 decimal
+const fmtS = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1});
+const signed = n => (n>=0?'+':'-') + fmt(n);
 const signedPct = n => (n>=0?'+':'') + n.toFixed(2) + '%';
-// Short format: 1.23T, 456B, 6.1MM, 123K
+
 function fmtShort(n) {
-  const sign = n < 0 ? '-' : '+';
+  const sign = n < 0 ? '-' : '';
   const a = Math.abs(n);
   if (a >= 1e12) return sign + '$' + (a/1e12).toFixed(2) + 'T';
   if (a >= 1e9)  return sign + '$' + (a/1e9).toFixed(2) + 'B';
@@ -192,163 +320,122 @@ function fmtShort(n) {
   if (a >= 1e3)  return sign + '$' + (a/1e3).toFixed(1) + 'K';
   return sign + '$' + a.toFixed(2);
 }
-function fmtShortAbs(n) { return fmtShort(n).slice(1); } // no sign
+function signedShort(n){ return (n>=0?'+':'')+fmtShort(n); }
+
 function hexRgb(h){ return `${parseInt(h.slice(1,3),16)},${parseInt(h.slice(3,5),16)},${parseInt(h.slice(5,7),16)}`; }
+
 function fmtDate(str){
   if(!str) return '';
   const d = new Date(str+'T12:00:00');
-  return d.toLocaleDateString('en-US',{month:'short',year:'numeric'}); // e.g. Jan 2022
+  return d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
 }
 
-// ─── CSV PARSER ──────────────────────────────────────────────────────────────
+function parseInputNum(id){
+  const raw=(document.getElementById(id).value||'').replace(/,/g,'').trim();
+  const v=parseFloat(raw);
+  return isNaN(v)?null:v;
+}
+
+// ─── CSV PARSER ───────────────────────────────────────────────────────────────
 function parseYahooCSV(text) {
-  const lines = text.trim().split('\n').map(l => l.trim()).filter(Boolean);
-  if (lines.length < 2) throw new Error('CSV too short');
-
+  const lines = text.trim().split('\n').map(l=>l.trim()).filter(Boolean);
+  if(lines.length<2) throw new Error('CSV too short');
   const sep = lines[0].includes('\t') ? '\t' : ',';
-  const rawHeaders = lines[0].split(sep).map(h => h.trim().replace(/"/g,'').toLowerCase());
+  const rawHeaders = lines[0].split(sep).map(h=>h.trim().replace(/"/g,'').toLowerCase());
+  let dateIdx = rawHeaders.findIndex(h=>h==='date');
+  if(dateIdx===-1) dateIdx=0;
+  let closeIdx = rawHeaders.findIndex(h=>h==='adj close');
+  if(closeIdx===-1) closeIdx=rawHeaders.findIndex(h=>h.includes('close'));
+  if(closeIdx===-1) throw new Error('No Close column. Headers: '+rawHeaders.join(', '));
 
-  // Find date and close column indices
-  let dateIdx = rawHeaders.findIndex(h => h === 'date');
-  if (dateIdx === -1) dateIdx = 0;
-
-  let closeIdx = rawHeaders.findIndex(h => h === 'adj close');
-  if (closeIdx === -1) closeIdx = rawHeaders.findIndex(h => h.includes('close'));
-  if (closeIdx === -1) throw new Error('No Close column found. Headers: ' + rawHeaders.join(', '));
-
-  // Normalize various date formats to YYYY-MM-DD
-  function normalizeDate(s) {
-    s = (s||'').trim().replace(/"/g,'');
-    if (!s) return null;
-    // YYYY-MM-DD already
-    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
-    // M/D/YY or M/D/YYYY
-    if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)) {
-      const [m,d,y] = s.split('/');
-      const year = y.length===2 ? (parseInt(y)>30?'19'+y:'20'+y) : y;
+  function normalizeDate(s){
+    s=(s||'').trim().replace(/"/g,'');
+    if(!s) return null;
+    if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+    if(/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)){
+      const[m,d,y]=s.split('/');
+      const year=y.length===2?(parseInt(y)>30?'19'+y:'20'+y):y;
       return year+'-'+m.padStart(2,'0')+'-'+d.padStart(2,'0');
     }
     return null;
   }
-
-  const prices = [], dates = [];
-  // Start from line 1, skip any row where the date column doesn't parse
-  // (handles pandas multi-level header rows like the ticker name row)
-  for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(sep);
-    if (cols.length <= Math.max(dateIdx, closeIdx)) continue;
-
-    const dateStr = normalizeDate(cols[dateIdx]);
-    if (!dateStr) continue; // skip ticker-name rows, blank rows, etc.
-
-    const closeStr = (cols[closeIdx]||'').trim().replace(/"/g,'');
-    const price = parseFloat(closeStr);
-    if (isNaN(price) || price <= 0) continue;
-
+  const prices=[],dates=[];
+  for(let i=1;i<lines.length;i++){
+    const cols=lines[i].split(sep);
+    if(cols.length<=Math.max(dateIdx,closeIdx)) continue;
+    const dateStr=normalizeDate(cols[dateIdx]);
+    if(!dateStr) continue;
+    const price=parseFloat((cols[closeIdx]||'').trim().replace(/"/g,''));
+    if(isNaN(price)||price<=0) continue;
     dates.push(dateStr);
-    prices.push(Math.round(price * 100) / 100);
+    prices.push(Math.round(price*100)/100);
   }
-
-  if (prices.length < 10) throw new Error(
-    'Only ' + prices.length + ' valid rows parsed. ' +
-    'Close column: "' + rawHeaders[closeIdx] + '". ' +
-    'First data line: ' + lines[1]
-  );
-  return { prices, dates };
+  if(prices.length<10) throw new Error('Only '+prices.length+' rows parsed. First data: '+lines[1]);
+  return{prices,dates};
 }
 
-// ─── STOCK POOL ──────────────────────────────────────────────────────────────
-// Loaded from server. Each entry: { sym, name, color, prices, dates }
-const STOCK_COLORS = [
-  '#4a9eff','#f5a623','#76ff03','#e879f9',
-  '#fb923c','#60a5fa','#34d399','#f472b6',
-  '#a78bfa','#fbbf24','#38bdf8','#4ade80',
-];
-let STOCK_POOL = [];   // filled by loadStocks()
-let SYMS = [];         // list of symbol strings
+// ─── STOCK POOL ───────────────────────────────────────────────────────────────
+const STOCK_COLORS=['#4a9eff','#f5a623','#76ff03','#e879f9','#fb923c','#60a5fa','#34d399','#f472b6','#a78bfa','#fbbf24','#38bdf8','#4ade80'];
+let STOCK_POOL=[], SYMS=[];
 
-// ─── LOAD STOCKS FROM SERVER ─────────────────────────────────────────────────
-async function loadStocks() {
-  const loadingEl   = document.getElementById('loading');
-  const loadingText = document.getElementById('loading-text');
-  const loadingFill = document.getElementById('loading-fill');
-  const loadingErr  = document.getElementById('loading-error');
-
-  try {
-    // 1. Fetch the stock list from static JSON
-    loadingText.textContent = 'FETCHING STOCK LIST...';
-    const listRes = await fetch('/stocks/index.json');
-    if (!listRes.ok) throw new Error('Could not load /stocks/index.json (HTTP ' + listRes.status + ')');
-    const stocks = await listRes.json();
-    if (!Array.isArray(stocks) || stocks.length === 0)
-      throw new Error('index.json is empty — add stock names to it');
-
-    // 2. Fetch each CSV directly as a static file
-    for (let i = 0; i < stocks.length; i++) {
-      const sym = stocks[i];
-      loadingText.textContent = 'LOADING ' + sym + '... (' + (i+1) + '/' + stocks.length + ')';
-      loadingFill.style.width = ((i+1)/stocks.length*100) + '%';
-
-      try {
-        const csvRes = await fetch('/stocks/' + encodeURIComponent(sym) + '.csv');
-        if (!csvRes.ok) throw new Error('HTTP ' + csvRes.status);
-        const csvText = await csvRes.text();
-        const { prices, dates } = parseYahooCSV(csvText);
-
-        STOCK_POOL.push({
-          sym,
-          name: sym,
-          color: STOCK_COLORS[i % STOCK_COLORS.length],
-          prices,
-          dates,
-        });
-      } catch(e) {
-        console.warn('Skipping ' + sym + ':', e.message);
-      }
+async function loadStocks(){
+  const loadingEl=document.getElementById('loading');
+  const loadingText=document.getElementById('loading-text');
+  const loadingFill=document.getElementById('loading-fill');
+  const loadingErr=document.getElementById('loading-error');
+  try{
+    loadingText.textContent='FETCHING STOCK LIST...';
+    const listRes=await fetch('/stocks/index.json');
+    if(!listRes.ok) throw new Error('Could not load /stocks/index.json (HTTP '+listRes.status+')');
+    const stocks=await listRes.json();
+    if(!Array.isArray(stocks)||stocks.length===0) throw new Error('index.json is empty');
+    for(let i=0;i<stocks.length;i++){
+      const sym=stocks[i];
+      loadingText.textContent='LOADING '+sym+'... ('+(i+1)+'/'+stocks.length+')';
+      loadingFill.style.width=((i+1)/stocks.length*100)+'%';
+      try{
+        const csvRes=await fetch('/stocks/'+encodeURIComponent(sym)+'.csv');
+        if(!csvRes.ok) throw new Error('HTTP '+csvRes.status);
+        const{prices,dates}=parseYahooCSV(await csvRes.text());
+        STOCK_POOL.push({sym,name:sym,color:STOCK_COLORS[i%STOCK_COLORS.length],prices,dates});
+      }catch(e){ console.warn('Skipping '+sym+':',e.message); }
     }
-
-    if (STOCK_POOL.length === 0) throw new Error('All CSVs failed to parse — check your CSV files');
-
-    SYMS = STOCK_POOL.map(s => s.sym);
+    if(STOCK_POOL.length===0) throw new Error('All CSVs failed to parse');
+    SYMS=STOCK_POOL.map(s=>s.sym);
     loadingEl.classList.add('hide');
     init();
-
-  } catch(e) {
-    loadingText.textContent = 'ERROR';
-    loadingErr.style.display = 'block';
-    loadingErr.textContent = e.message;
+  }catch(e){
+    loadingText.textContent='ERROR';
+    loadingErr.style.display='block';
+    loadingErr.textContent=e.message;
   }
 }
 
-// ─── CONSTANTS ───────────────────────────────────────────────────────────────
-const TOTAL    = 200;
-const ROUND_MS = 30000;
-const TICK_MS  = ROUND_MS / TOTAL;
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+const TOTAL=200, ROUND_MS=30000, TICK_MS=ROUND_MS/TOTAL;
 
-// ─── STATE ───────────────────────────────────────────────────────────────────
-let balance=100, totalPnL=0, roundNum=0;
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let balance=100, initialBalance=100, totalPnL=0, roundNum=0;
 let holding=false, entryPrice=null, entryIdx=null;
-let revealed=0, roundStart=null, running=false;
+let revealed=0, roundStart=null, running=false, paused=false;
 let currentSym='', PRICES=[], DATES=[], equityCurve=[100];
 let balanceAtRoundStart=100;
 let tickHandle=null;
-let goalAmount=0;          // user-set profit goal in $
-let sessionStart=null;     // Date.now() when first round started
-let sessionTimerHandle=null;
+let goalAmount=0;
+let sessionStart=null, sessionTimerHandle=null;
+let pauseStart=null, totalPauseMs=0;
 
-// ─── ZOOM ────────────────────────────────────────────────────────────────────
+// ─── ZOOM / CAMERA ────────────────────────────────────────────────────────────
 let zoomLevel=1.0, zoomTarget=1.0;
 const ZOOM_LERP=0.015, ZOOM_MIN=0.25, ZOOM_MAX=1.00;
-
-// ─── CAMERA ──────────────────────────────────────────────────────────────────
 let camShift=0, camShiftTarget=0;
 const CAM_LERP=0.08, CAM_AHEAD=14, CAM_STRENGTH=0.30;
 
-// ─── CANVAS ──────────────────────────────────────────────────────────────────
-const mainCanvas  = document.getElementById('mainChart');
-const equityCanvas= document.getElementById('equityChart');
-const mCtx = mainCanvas.getContext('2d');
-const eCtx = equityCanvas.getContext('2d');
+// ─── CANVAS ───────────────────────────────────────────────────────────────────
+const mainCanvas=document.getElementById('mainChart');
+const equityCanvas=document.getElementById('equityChart');
+const mCtx=mainCanvas.getContext('2d');
+const eCtx=equityCanvas.getContext('2d');
 const mW=()=>mainCanvas.offsetWidth;
 const mH=()=>mainCanvas.offsetHeight;
 const eW=()=>equityCanvas.offsetWidth;
@@ -367,54 +454,44 @@ window.addEventListener('resize',resizeAll);
 function updateSessionTimer(){
   if(!sessionStart) return;
   const el=document.getElementById('hSessionTime');
-  const s=Math.floor((Date.now()-sessionStart)/1000);
-  const mm=String(Math.floor(s/60)).padStart(2,'0');
-  const ss=String(s%60).padStart(2,'0');
-  el.textContent=mm+':'+ss;
+  const s=Math.floor((Date.now()-sessionStart-totalPauseMs)/1000);
+  el.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 }
 
-// ─── ZOOM UPDATE ─────────────────────────────────────────────────────────────
+// ─── ZOOM / CAMERA ────────────────────────────────────────────────────────────
 function updateZoom(){
   if(revealed<10) return;
   const recent=PRICES.slice(Math.max(0,revealed-20),revealed);
-  const lo=Math.min(...recent), hi=Math.max(...recent);
+  const lo=Math.min(...recent),hi=Math.max(...recent);
   const volPct=(hi-lo)/((lo+hi)/2||1);
   const normalized=Math.max(0,Math.min(1,(volPct-0.01)/0.07));
   zoomTarget=ZOOM_MAX-normalized*(ZOOM_MAX-ZOOM_MIN);
   zoomLevel+=(zoomTarget-zoomLevel)*ZOOM_LERP;
 }
-
-// ─── CAMERA UPDATE ───────────────────────────────────────────────────────────
 function updateCamera(){
   if(revealed>1&&revealed<=PRICES.length-CAM_AHEAD){
-    const cur=PRICES[revealed-1];
-    const ahead=PRICES[revealed-1+CAM_AHEAD];
+    const cur=PRICES[revealed-1],ahead=PRICES[revealed-1+CAM_AHEAD];
     const lookback=PRICES.slice(Math.max(0,revealed-30),revealed);
-    const lo=Math.min(...lookback), hi=Math.max(...lookback);
-    const volatility=(hi-lo)||1;
-    const raw=(ahead-cur)/(volatility*0.5);
+    const lo=Math.min(...lookback),hi=Math.max(...lookback);
+    const raw=(ahead-cur)/((hi-lo||1)*0.5);
     camShiftTarget=Math.max(-1,Math.min(1,raw));
-  } else {
-    camShiftTarget=0;
-  }
+  }else{ camShiftTarget=0; }
   camShift+=(camShiftTarget-camShift)*CAM_LERP;
 }
 
-// ─── DRAW MAIN ───────────────────────────────────────────────────────────────
+// ─── DRAW MAIN ────────────────────────────────────────────────────────────────
 function drawMain(){
-  const w=mW(), h=mH();
+  const w=mW(),h=mH();
   mCtx.clearRect(0,0,w,h);
   if(revealed<2) return;
-
   const VISIBLE=Math.max(20,Math.round(TOTAL*zoomLevel));
   const allRevealed=PRICES.slice(0,revealed);
-  const allDates   =DATES.slice(0,revealed);
+  const allDates=DATES.slice(0,revealed);
   const visible=allRevealed.slice(Math.max(0,allRevealed.length-VISIBLE));
-  const vdates =allDates.slice(Math.max(0,allDates.length-VISIBLE));
+  const vdates=allDates.slice(Math.max(0,allDates.length-VISIBLE));
 
-  const CLIP_TOP=0.10, CLIP_BOT=0.10;
-  const clipTop=h*CLIP_TOP, clipBot=h*(1-CLIP_BOT), clipH=clipBot-clipTop;
-  const padR=66, padB=30;
+  const clipTop=h*0.10, clipBot=h*0.90, clipH=clipBot-clipTop;
+  const padR=62, padB=28;
   const cW=w-padR, padT=clipTop, cH=clipH-padB;
 
   const minP=Math.min(...visible), maxP=Math.max(...visible);
@@ -425,11 +502,13 @@ function drawMain(){
 
   const xOf=i=>(i/(VISIBLE-1))*cW;
   const yOf=p=>padT+cH-((p-minPad)/(maxPad-minPad))*cH;
+  const clampY=y=>Math.max(clipTop,Math.min(clipBot,y));
   const startSlot=VISIBLE-visible.length;
   const sc=STOCK_POOL.find(s=>s.sym===currentSym)?.color||'#4a9eff';
 
+  // Clip to safe band
   mCtx.save();
-  mCtx.beginPath(); mCtx.rect(0,clipTop,w+2,clipH); mCtx.clip();
+  mCtx.beginPath(); mCtx.rect(0,clipTop,cW+padR,clipH); mCtx.clip();
 
   // Grid
   mCtx.strokeStyle='rgba(255,255,255,0.035)'; mCtx.lineWidth=1;
@@ -437,10 +516,8 @@ function drawMain(){
     const y=padT+(i/5)*cH;
     mCtx.beginPath(); mCtx.moveTo(0,y); mCtx.lineTo(cW,y); mCtx.stroke();
   }
-  mCtx.strokeStyle='rgba(255,255,255,0.08)';
-  mCtx.beginPath(); mCtx.moveTo(0,padT+cH); mCtx.lineTo(cW,padT+cH); mCtx.stroke();
 
-  const clampY=y=>Math.max(clipTop,Math.min(clipBot,y));
+  // Points — clamped so nothing bleeds outside the chart area
   const pts=visible.map((p,i)=>({x:xOf(startSlot+i),y:clampY(yOf(p))}));
   const last=pts[pts.length-1];
 
@@ -451,7 +528,7 @@ function drawMain(){
     else{ mCtx.lineTo(pt.x,pts[i-1].y); mCtx.lineTo(pt.x,pt.y); }
   });
   mCtx.lineTo(last.x,padT+cH); mCtx.lineTo(xOf(startSlot),padT+cH); mCtx.closePath();
-  const g=mCtx.createLinearGradient(0,padT,0,clipBot);
+  const g=mCtx.createLinearGradient(0,padT,0,padT+cH);
   const rgb=hexRgb(holding?'#00e676':sc);
   g.addColorStop(0,`rgba(${rgb},0.15)`); g.addColorStop(1,'rgba(0,0,0,0)');
   mCtx.fillStyle=g; mCtx.fill();
@@ -470,14 +547,12 @@ function drawMain(){
   // Position line
   if(holding&&entryPrice!=null&&entryIdx!=null){
     const cur=visible[visible.length-1];
-    const profit=cur-entryPrice;
-    const ic=profit>=0?'#00e676':'#ff1744';
+    const ic=cur>=entryPrice?'#00e676':'#ff1744';
     const windowStart=Math.max(0,allRevealed.length-VISIBLE);
-    const entrySlot=startSlot+(entryIdx-windowStart);
-    const x1=xOf(Math.max(0,entrySlot)), y1=yOf(entryPrice);
+    const x1=xOf(Math.max(0,startSlot+(entryIdx-windowStart)));
+    const y1=clampY(yOf(entryPrice));
     mCtx.save();
-    mCtx.strokeStyle=ic; mCtx.lineWidth=1.5;
-    mCtx.shadowColor=ic; mCtx.shadowBlur=8;
+    mCtx.strokeStyle=ic; mCtx.lineWidth=1.5; mCtx.shadowColor=ic; mCtx.shadowBlur=8;
     mCtx.setLineDash([4,4]);
     mCtx.beginPath(); mCtx.moveTo(x1,y1); mCtx.lineTo(last.x,last.y); mCtx.stroke();
     mCtx.setLineDash([]); mCtx.shadowBlur=0;
@@ -485,18 +560,18 @@ function drawMain(){
     mCtx.fillStyle=ic; mCtx.shadowColor=ic; mCtx.shadowBlur=12; mCtx.fill(); mCtx.shadowBlur=0;
     mCtx.restore();
     const openPnL=(cur-entryPrice)*(balance/entryPrice);
-    mCtx.fillStyle=ic; mCtx.font='700 11px IBM Plex Mono,monospace'; mCtx.textAlign='right';
+    mCtx.fillStyle=ic; mCtx.font='700 10px IBM Plex Mono,monospace'; mCtx.textAlign='right';
     mCtx.fillText(signed(openPnL),Math.min((x1+last.x)/2,cW-4),(y1+last.y)/2-8);
   }
 
-  mCtx.restore();
+  mCtx.restore(); // end clip
 
-  // Y labels
-  mCtx.fillStyle='#aabbcc'; mCtx.font='600 11px IBM Plex Mono,monospace'; mCtx.textAlign='right';
+  // Y labels (outside clip so always readable)
+  mCtx.fillStyle='#aabbcc'; mCtx.font='600 10px IBM Plex Mono,monospace'; mCtx.textAlign='right';
   for(let i=0;i<=5;i++){
     const val=maxPad-(i/5)*(maxPad-minPad);
     const y=padT+(i/5)*cH;
-    if(y>=clipTop-2&&y<=clipBot+2) mCtx.fillText(fmtS(val),w-5,y+3);
+    if(y>=clipTop&&y<=clipBot) mCtx.fillText(fmtS(val),w-4,y+3);
   }
 
   // X date labels
@@ -504,78 +579,76 @@ function drawMain(){
   const labelEvery=Math.max(5,Math.round(VISIBLE/8));
   vdates.forEach((d,i)=>{
     if(i%labelEvery===0||i===vdates.length-1)
-      mCtx.fillText(fmtDate(d),xOf(startSlot+i),clipBot+22);
+      mCtx.fillText(fmtDate(d),xOf(startSlot+i),clipBot+20);
   });
 
-  // Dot
-  const dotY=Math.max(clipTop+5,Math.min(clipBot-5,last.y));
+  // Current price dot
+  const dotY=clampY(last.y);
   mCtx.beginPath(); mCtx.arc(last.x,dotY,4,0,Math.PI*2);
   mCtx.fillStyle=lineCol; mCtx.shadowColor=lineCol; mCtx.shadowBlur=16; mCtx.fill(); mCtx.shadowBlur=0;
 
   const d0=vdates[0],d1=vdates[vdates.length-1];
   document.getElementById('mainLabel').textContent=
     currentSym+'  ·  '+(d0?fmtDate(d0):'')+
-    (d1&&d1!==d0?' – '+fmtDate(d1):'')+
-    '  ·  '+VISIBLE+' bars';
+    (d1&&d1!==d0?' – '+fmtDate(d1):'')+' · '+VISIBLE+' bars';
 }
 
-// ─── DRAW EQUITY ─────────────────────────────────────────────────────────────
+// ─── DRAW EQUITY ──────────────────────────────────────────────────────────────
 function drawEquity(){
   const w=eW(),h=eH();
   eCtx.clearRect(0,0,w,h);
   if(equityCurve.length<2) return;
-  const padR=66,padT=12,padB=8;
+  const padR=62,padT=10,padB=8;
   const cW=w-padR,cH=h-padT-padB;
   const n=equityCurve.length;
   const minV=Math.min(...equityCurve)*0.995,maxV=Math.max(...equityCurve)*1.005;
   const xOf=i=>(i/Math.max(n-1,1))*cW;
   const yOf=v=>padT+cH-((v-minV)/((maxV-minV)||1))*cH;
   const lastVal=equityCurve[n-1];
-  const lc=lastVal>=100?'#00e676':'#ff1744';
+  const lc=lastVal>=initialBalance?'#00e676':'#ff1744';
 
   eCtx.strokeStyle='rgba(255,255,255,0.04)'; eCtx.lineWidth=1;
   for(let i=0;i<=2;i++){
     const y=padT+(i/2)*cH;
     eCtx.beginPath(); eCtx.moveTo(0,y); eCtx.lineTo(cW,y); eCtx.stroke();
   }
-  eCtx.fillStyle='#aabbcc'; eCtx.font='600 11px IBM Plex Mono,monospace'; eCtx.textAlign='right';
-  for(let i=0;i<=2;i++){
-    const val=maxV-(i/2)*(maxV-minV);
-    eCtx.fillText(fmtS(val),w-5,padT+(i/2)*cH+3);
-  }
-  const refY=yOf(100);
+  eCtx.fillStyle='#aabbcc'; eCtx.font='600 10px IBM Plex Mono,monospace'; eCtx.textAlign='right';
+  for(let i=0;i<=2;i++)
+    eCtx.fillText(fmtS(maxV-(i/2)*(maxV-minV)),w-4,padT+(i/2)*cH+3);
+
+  const refY=yOf(initialBalance);
   eCtx.save(); eCtx.setLineDash([3,6]);
   eCtx.strokeStyle='rgba(255,255,255,0.1)';
   eCtx.beginPath(); eCtx.moveTo(0,refY); eCtx.lineTo(cW,refY); eCtx.stroke();
   eCtx.restore();
   eCtx.fillStyle='#8899aa'; eCtx.font='600 10px IBM Plex Mono,monospace'; eCtx.textAlign='left';
-  eCtx.fillText('$100',4,refY-3);
+  eCtx.fillText(fmtShort(initialBalance),4,refY-3);
 
   eCtx.beginPath();
-  equityCurve.forEach((v,i)=>{ const x=xOf(i),y=yOf(v); i===0?eCtx.moveTo(x,y):eCtx.lineTo(x,y); });
+  equityCurve.forEach((v,i)=>{const x=xOf(i),y=yOf(v);i===0?eCtx.moveTo(x,y):eCtx.lineTo(x,y);});
   eCtx.lineTo(xOf(n-1),h+5); eCtx.lineTo(0,h+5); eCtx.closePath();
   const eg=eCtx.createLinearGradient(0,padT,0,h);
-  eg.addColorStop(0,lastVal>=100?'rgba(0,230,118,0.2)':'rgba(255,23,68,0.2)');
+  eg.addColorStop(0,lastVal>=initialBalance?'rgba(0,230,118,0.2)':'rgba(255,23,68,0.2)');
   eg.addColorStop(1,'rgba(0,0,0,0)');
   eCtx.fillStyle=eg; eCtx.fill();
 
   eCtx.beginPath();
-  equityCurve.forEach((v,i)=>{ const x=xOf(i),y=yOf(v); i===0?eCtx.moveTo(x,y):eCtx.lineTo(x,y); });
+  equityCurve.forEach((v,i)=>{const x=xOf(i),y=yOf(v);i===0?eCtx.moveTo(x,y):eCtx.lineTo(x,y);});
   eCtx.strokeStyle=lc; eCtx.lineWidth=1.5; eCtx.shadowColor=lc; eCtx.shadowBlur=5;
   eCtx.stroke(); eCtx.shadowBlur=0;
 
   const dotX=xOf(n-1),dotY=yOf(lastVal);
   eCtx.beginPath(); eCtx.arc(dotX,dotY,3,0,Math.PI*2);
   eCtx.fillStyle=lc; eCtx.shadowColor=lc; eCtx.shadowBlur=8; eCtx.fill(); eCtx.shadowBlur=0;
-  eCtx.fillStyle=lc; eCtx.font='700 11px IBM Plex Mono,monospace'; eCtx.textAlign='left';
-  eCtx.fillText(fmt(lastVal),dotX+6,dotY+4);
+  eCtx.fillStyle=lc; eCtx.font='700 10px IBM Plex Mono,monospace'; eCtx.textAlign='left';
+  eCtx.fillText(fmtShort(lastVal),dotX+6,dotY+4);
   eCtx.fillStyle='#8899aa'; eCtx.font='600 10px IBM Plex Mono,monospace';
   eCtx.fillText('Round '+roundNum,6,padT+cH+8);
 }
 
 // ─── TIMER / HUD ─────────────────────────────────────────────────────────────
 function updateTimer(){
-  const rem=Math.max(0,ROUND_MS-(Date.now()-roundStart));
+  const rem=Math.max(0,ROUND_MS-(Date.now()-roundStart-totalPauseMs));
   document.getElementById('timerFill').style.width=(rem/ROUND_MS*100)+'%';
   const secs=Math.ceil(rem/1000);
   document.getElementById('timerPill').textContent=secs;
@@ -587,51 +660,47 @@ function updateTimer(){
 function updateHUD(){
   const cur=revealed>0?PRICES[revealed-1]:null;
   const prev=revealed>1?PRICES[revealed-2]:null;
-  document.getElementById('hBalance').textContent=fmtShort(balance).replace(/^[+-]/,'');
+
+  // Balance: full + short
+  document.getElementById('hBalance').textContent=fmtFull(balance);
+  document.getElementById('hBalanceShort').textContent=fmtShort(balance);
   document.getElementById('hRound').textContent=roundNum;
   document.getElementById('hStock').textContent=currentSym;
   document.getElementById('stockTag').textContent=currentSym;
-  document.getElementById('stockFullName').textContent=
-    STOCK_POOL.find(s=>s.sym===currentSym)?.name||currentSym;
   if(cur){
     document.getElementById('livePrice').textContent=fmt(cur);
     if(prev){
-      const delta=cur-prev, pctD=(delta/prev)*100;
+      const delta=cur-prev,pctD=(delta/prev)*100;
       const el=document.getElementById('livePriceDelta');
       el.textContent=(delta>=0?'▲':'▼')+Math.abs(pctD).toFixed(2)+'%';
       el.style.color=delta>=0?'var(--green)':'var(--red)';
     }
   }
 
-  // Round P&L (live, this round only)
   const roundPnL=+(balance-balanceAtRoundStart).toFixed(2);
   const rpEl=document.getElementById('hRoundPnl');
   rpEl.textContent=roundPnL!==0?signed(roundPnL):'—';
   rpEl.className='hud-val '+(roundPnL>0?'green':roundPnL<0?'red':'');
 
-  // Session P&L
   const pnlEl=document.getElementById('hPnl');
   pnlEl.textContent=totalPnL!==0?signed(totalPnL):'—';
   pnlEl.className='hud-val '+(totalPnL>0?'green':totalPnL<0?'red':'');
 
-  // Goal progress
   const gEl=document.getElementById('hGoalPct');
   if(goalAmount>0){
     const gPct=(totalPnL/goalAmount)*100;
     gEl.textContent=(gPct>=0?'+':'')+gPct.toFixed(2)+'% of goal';
     gEl.className='hud-val '+(gPct>=100?'green':gPct>0?'':'red');
-  } else {
-    gEl.textContent='no goal set';
-    gEl.className='hud-val';
+  }else{
+    gEl.textContent='no goal'; gEl.className='hud-val';
   }
 
-  // Open P&L
   const oEl=document.getElementById('hOpen');
   if(holding&&entryPrice&&cur){
     const u=(cur-entryPrice)*(balance/entryPrice);
     oEl.textContent=signed(u);
     oEl.className='hud-val '+(u>=0?'green':'red');
-  } else { oEl.textContent='—'; oEl.className='hud-val'; }
+  }else{ oEl.textContent='—'; oEl.className='hud-val'; }
 
   updateSessionTimer();
 }
@@ -644,7 +713,7 @@ function flashLabel(text,color){
 
 // ─── TRADING ─────────────────────────────────────────────────────────────────
 function buy(){
-  if(!running||holding||revealed===0) return;
+  if(!running||paused||holding||revealed===0) return;
   holding=true; entryPrice=PRICES[revealed-1]; entryIdx=revealed-1;
   document.getElementById('holdingBar').classList.add('show');
   flashLabel('BUY','#00e676');
@@ -663,96 +732,166 @@ function sell(){
   updateHUD(); drawMain();
 }
 
-document.addEventListener('mousedown',buy);
-document.addEventListener('mouseup',sell);
-document.addEventListener('touchstart',e=>{e.preventDefault();buy();},{passive:false});
-document.addEventListener('touchend',  e=>{e.preventDefault();sell();},{passive:false});
+// Touch/mouse events on the chart area only
+const mainWrap=document.getElementById('mainWrap');
+mainWrap.addEventListener('mousedown',buy);
+mainWrap.addEventListener('mouseup',sell);
+mainWrap.addEventListener('touchstart',e=>{e.preventDefault();buy();},{passive:false});
+mainWrap.addEventListener('touchend',  e=>{e.preventDefault();sell();},{passive:false});
 
-// ─── OVERLAY ─────────────────────────────────────────────────────────────────
+// ─── PAUSE ────────────────────────────────────────────────────────────────────
+function togglePause(e){
+  if(e) e.stopPropagation();
+  if(!running) return;
+  paused=!paused;
+  const pauseScreen=document.getElementById('pauseScreen');
+  const pauseBtn=document.getElementById('pauseBtn');
+  if(paused){
+    pauseStart=Date.now();
+    clearTimeout(tickHandle);
+    pauseScreen.classList.add('show');
+    pauseBtn.textContent='▶ RESUME'; pauseBtn.classList.add('paused');
+    clearInterval(sessionTimerHandle);
+  }else{
+    totalPauseMs+=Date.now()-pauseStart;
+    roundStart+=Date.now()-pauseStart; // shift round start forward
+    pauseScreen.classList.remove('show');
+    pauseBtn.textContent='⏸ PAUSE'; pauseBtn.classList.remove('paused');
+    sessionTimerHandle=setInterval(updateSessionTimer,1000);
+    tick();
+  }
+}
+// Tap pause screen to resume
+document.getElementById('pauseScreen').addEventListener('click',()=>{ if(paused) togglePause(); });
+
+// ─── MENU ─────────────────────────────────────────────────────────────────────
+function goToMenu(e){
+  if(e) e.stopPropagation();
+  // Stop everything
+  running=false; paused=false;
+  clearTimeout(tickHandle);
+  clearInterval(sessionTimerHandle);
+  if(holding) sell();
+  // Reset state fully
+  balance=100; initialBalance=100; totalPnL=0; roundNum=0;
+  equityCurve=[100]; goalAmount=0;
+  sessionStart=null; totalPauseMs=0;
+  document.getElementById('pauseScreen').classList.remove('show');
+  document.getElementById('pauseBtn').textContent='⏸ PAUSE';
+  document.getElementById('pauseBtn').classList.remove('paused');
+  document.getElementById('hSessionTime').textContent='00:00';
+  // Reset inputs
+  document.getElementById('ov-balance-input').value='';
+  document.getElementById('ov-goal-input').value='';
+  document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('selected'));
+  showOverlay(true,0);
+}
+
+// ─── OVERLAY ──────────────────────────────────────────────────────────────────
 const overlay=document.getElementById('overlay');
-const ovBtn=document.getElementById('ov-btn');
 
 function showOverlay(isFirst,roundPnL){
-  document.getElementById('ov-balance').textContent=fmt(balance);
-  document.getElementById('ov-balance').className='ov-card-val'+(balance>=100?'':' red');
-  const pct=((balance-100)/100)*100;
-  const pctEl=document.getElementById('ov-pct');
-  pctEl.textContent=signedPct(pct);
-  pctEl.className='ov-card-val '+(pct>0?'green':pct<0?'red':'');
-  // Show goal row only on first round
-  document.getElementById('ov-goal-row').style.display=isFirst?'flex':'none';
+  const cardsEl=document.getElementById('ov-cards');
+  const setupEl=document.getElementById('ov-setup');
+  const challengesEl=document.getElementById('ov-challenges');
   const resultEl=document.getElementById('ov-result');
+
   if(isFirst){
     resultEl.style.display='none';
-    document.getElementById('ov-pnl').textContent='—';
-    document.getElementById('ov-pnl').className='ov-card-val';
-    document.getElementById('ov-roundpnl').textContent='—';
-    document.getElementById('ov-roundpnl').className='ov-card-val';
+    cardsEl.style.display='none';
+    setupEl.style.display='flex';
+    challengesEl.style.display='flex';
     document.getElementById('ov-title').textContent='READY TO TRADE';
-    document.getElementById('ov-subtitle').textContent='Your capital is at risk';
-  } else {
+    document.getElementById('ov-subtitle').textContent='Set your goal and start trading';
+    document.getElementById('ov-btn').textContent='START ROUND 1';
+  }else{
     resultEl.style.display='block';
+    cardsEl.style.display='grid';
+    setupEl.style.display='none';
+    challengesEl.style.display='none';
+
     const roundPct=(roundPnL/balanceAtRoundStart)*100;
     resultEl.textContent=(roundPnL>=0?'+':'')+roundPct.toFixed(2)+'%';
     resultEl.className=roundPnL>=0?'green':'red';
     document.getElementById('ov-title').textContent='ROUND COMPLETE';
-    document.getElementById('ov-subtitle').textContent=
-      roundPnL>=0?'Nice trade. Next round awaits.':'Better luck next time.';
-    const pnlEl=document.getElementById('ov-pnl');
-    pnlEl.textContent=signed(totalPnL);
-    pnlEl.className='ov-card-val '+(totalPnL>=0?'green':'red');
-    const rEl=document.getElementById('ov-roundpnl');
-    rEl.textContent=signed(roundPnL);
-    rEl.className='ov-card-val '+(roundPnL>=0?'green':'red');
+    document.getElementById('ov-subtitle').textContent=roundPnL>=0?'Nice trade.':'Better luck next time.';
+
+    document.getElementById('ov-balance').textContent=fmtFull(balance);
+    document.getElementById('ov-balance').className='ov-card-val'+(balance>=initialBalance?'':' red');
+    document.getElementById('ov-roundpnl').textContent=signed(roundPnL);
+    document.getElementById('ov-roundpnl').className='ov-card-val '+(roundPnL>=0?'green':'red');
+    document.getElementById('ov-pnl').textContent=signed(totalPnL);
+    document.getElementById('ov-pnl').className='ov-card-val '+(totalPnL>=0?'green':'red');
+
+    const gEl=document.getElementById('ov-goalpct');
+    if(goalAmount>0){
+      const gPct=(totalPnL/goalAmount)*100;
+      gEl.textContent=(gPct>=0?'+':'')+gPct.toFixed(2)+'%';
+      gEl.className='ov-card-val '+(gPct>=100?'green':gPct>0?'':'red');
+    }else{ gEl.textContent='—'; gEl.className='ov-card-val'; }
+
+    pickNextStock();
+    document.getElementById('ov-stock').textContent=currentSym;
+    document.getElementById('ov-round').textContent=roundNum+1;
+    document.getElementById('ov-btn').textContent='NEXT ROUND →';
   }
-  // Pick next stock now so we can show it
-  pickNextStock();
-  document.getElementById('ov-stock').textContent=currentSym;
-  document.getElementById('ov-round').textContent=roundNum+1;
-  ovBtn.textContent=isFirst?'START ROUND 1':'NEXT ROUND →';
   overlay.classList.add('show');
 }
 
 function hideOverlay(){ overlay.classList.remove('show'); }
 
-function parseInputNum(id){
-  // Parse number from text input — strips commas, spaces
-  const raw=(document.getElementById(id).value||'').replace(/,/g,'').replace(/\s/g,'');
-  const v=parseFloat(raw);
-  return isNaN(v)?null:v;
-}
 function startFromOverlay(){
-  // Read starting balance (first round only)
   if(roundNum===0){
     const b=parseInputNum('ov-balance-input');
     if(b!=null&&b>=0.01&&b<=1000000){
       balance=Math.round(b*100)/100;
+      initialBalance=balance;
       equityCurve=[balance];
       balanceAtRoundStart=balance;
     }
+    const g=parseInputNum('ov-goal-input');
+    if(g!=null&&g>0) goalAmount=g;
   }
-  // Read goal
-  const g=parseInputNum('ov-goal-input');
-  if(g!=null&&g>0) goalAmount=g;
   hideOverlay();
   startRound();
 }
-ovBtn.addEventListener('click',e=>{e.stopPropagation();startFromOverlay();});
-overlay.addEventListener('click',startFromOverlay);
 
-// ─── ROUND FLOW ──────────────────────────────────────────────────────────────
+// Clicking overlay background starts round (but not on buttons/inputs)
+overlay.addEventListener('click',e=>{
+  if(e.target===overlay||e.target.id==='ov-click-hint'||e.target.id==='ov-subtitle'||e.target.id==='ov-title'){
+    startFromOverlay();
+  }
+});
+
+// ─── CHALLENGES ───────────────────────────────────────────────────────────────
+function buildChallenges(){
+  const grid=document.getElementById('challengesGrid');
+  CHALLENGES.forEach((ch,i)=>{
+    const btn=document.createElement('button');
+    btn.className='ch-btn';
+    btn.innerHTML=`<span class="ch-name">${ch.name}</span><span class="ch-goal">Goal: ${ch.label} · Start: ${fmtShort(ch.balance)}</span>`;
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('ov-goal-input').value=ch.goal;
+      document.getElementById('ov-balance-input').value=ch.balance;
+    });
+    grid.appendChild(btn);
+  });
+}
+
+// ─── ROUND FLOW ───────────────────────────────────────────────────────────────
 function pickNextStock(){
-  // Pick a random stock different from last
   const others=SYMS.filter(s=>s!==currentSym);
   const pool=others.length>0?others:SYMS;
   const chosen=pool[Math.floor(Math.random()*pool.length)];
-  const stockData=STOCK_POOL.find(s=>s.sym===chosen);
-
+  const sd=STOCK_POOL.find(s=>s.sym===chosen);
   currentSym=chosen;
-  const maxStart=stockData.prices.length-TOTAL;
+  const maxStart=sd.prices.length-TOTAL;
   const start=maxStart>0?Math.floor(Math.random()*maxStart):0;
-  PRICES=stockData.prices.slice(start,start+TOTAL);
-  DATES=stockData.dates.slice(start,start+TOTAL);
+  PRICES=sd.prices.slice(start,start+TOTAL);
+  DATES=sd.dates.slice(start,start+TOTAL);
   revealed=0; holding=false; entryPrice=null; entryIdx=null;
   camShift=0; camShiftTarget=0; zoomLevel=1.0; zoomTarget=1.0;
   balanceAtRoundStart=balance;
@@ -761,11 +900,11 @@ function pickNextStock(){
 function startRound(){
   if(!sessionStart){
     sessionStart=Date.now();
-    // Tick session timer every second
-    sessionTimerHandle=setInterval(updateSessionTimer, 1000);
+    totalPauseMs=0;
+    sessionTimerHandle=setInterval(updateSessionTimer,1000);
   }
   roundNum++;
-  running=true;
+  running=true; paused=false;
   roundStart=Date.now();
   updateHUD();
   tick();
@@ -780,20 +919,21 @@ function endRound(){
 }
 
 function tick(){
-  const elapsed=Date.now()-roundStart;
+  if(paused) return;
+  const elapsed=Date.now()-roundStart-totalPauseMs;
   if(elapsed>=ROUND_MS||revealed>=TOTAL){ endRound(); return; }
   revealed++;
   updateZoom(); updateCamera();
   equityCurve.push(balance);
   updateTimer(); updateHUD(); drawMain(); drawEquity();
-  const nextTick=roundStart+(revealed*TICK_MS)-Date.now();
+  const nextTick=roundStart+totalPauseMs+(revealed*TICK_MS)-Date.now();
   tickHandle=setTimeout(tick,Math.max(0,nextTick));
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 function init(){
+  buildChallenges();
   resizeAll();
-  // Pre-pick first stock so overlay shows something
   const first=SYMS[Math.floor(Math.random()*SYMS.length)];
   currentSym=first;
   showOverlay(true,0);
