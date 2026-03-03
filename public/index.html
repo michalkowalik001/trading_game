@@ -19,10 +19,12 @@
 /* ── ROOT LAYOUT: fixed full-screen column ── */
 html,body{
   width:100%; height:100%;
-  background:var(--bg); overflow:hidden;
+  background:var(--bg); overflow:hidden; max-width:100vw;
   font-family:'IBM Plex Mono',monospace;
   color:var(--text); user-select:none; cursor:crosshair;
 }
+/* Prevent any horizontal overflow on the overlay */
+#overlay{max-width:100vw;}
 #app{
   position:fixed; inset:0;
   display:flex; flex-direction:column;
@@ -147,11 +149,14 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 /* ── MAIN OVERLAY ── */
 #overlay{
   position:fixed;inset:0;z-index:100;background:rgba(4,6,10,.96);
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
   opacity:0;pointer-events:none;transition:opacity .3s;
-  overflow-y:auto;-webkit-overflow-scrolling:touch;padding:32px 16px 60px;gap:20px;
+  overflow:hidden;padding:32px 16px 40px;gap:20px;
 }
 #overlay.show{opacity:1;pointer-events:all;}
+@media(max-width:700px){
+  #overlay{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;justify-content:flex-start;padding:32px 16px 60px;}
+}
 #ov-logo{font-size:clamp(2rem,8vw,3.5rem);font-weight:700;letter-spacing:.4em;color:var(--gold);text-shadow:0 0 40px rgba(255,196,0,.4);}
 #ov-title{font-size:clamp(1.1rem,4vw,1.8rem);font-weight:700;letter-spacing:.25em;color:#fff;text-transform:uppercase;text-align:center;}
 #ov-subtitle{font-size:.88rem;color:#ccd6f0;letter-spacing:.1em;text-align:center;}
@@ -173,7 +178,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 .ov-card-val.gold{color:var(--gold);}
 
 /* setup fields */
-#ov-setup{display:flex;flex-direction:column;gap:12px;width:min(400px,90vw);}
+#ov-setup{display:flex;flex-direction:column;gap:12px;width:min(400px,90vw);max-width:100%;}
 .setup-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .setup-lbl{font-size:.75rem;letter-spacing:.1em;color:#ccd6f0;text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
 .setup-input{
@@ -186,7 +191,10 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 #ov-balance-input{color:var(--gold);}
 
 /* challenges — compact list */
-#ov-challenges{display:flex;flex-direction:column;gap:6px;width:min(420px,94vw);}
+#ov-challenges{display:flex;flex-direction:column;gap:6px;width:min(420px,94vw);max-width:100%;max-height:260px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+#ov-challenges::-webkit-scrollbar{width:4px;}
+#ov-challenges::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+@media(max-width:700px){#ov-challenges{max-height:none;overflow-y:visible;}}
 
 .challenge-lbl{font-size:.68rem;letter-spacing:.14em;color:#ccd6f0;text-transform:uppercase;}
 #challengesList{display:flex;flex-direction:column;gap:3px;}
@@ -208,7 +216,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 .ch-goal{color:var(--gold);font-size:.68rem;white-space:nowrap;}
 
 /* buttons row */
-#ov-buttons{display:flex;flex-direction:column;align-items:center;gap:10px;width:min(400px,90vw);}
+#ov-buttons{display:flex;flex-direction:column;align-items:center;gap:10px;width:min(400px,90vw);max-width:100%;}
 #ov-btn{
   font-family:'IBM Plex Mono',monospace;font-size:.95rem;font-weight:700;
   letter-spacing:.15em;text-transform:uppercase;
