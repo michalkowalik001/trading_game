@@ -151,11 +151,11 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
   position:fixed;inset:0;z-index:100;background:rgba(4,6,10,.96);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   opacity:0;pointer-events:none;transition:opacity .3s;
-  overflow:hidden;padding:32px 16px 40px;gap:20px;
+  overflow:hidden;padding:32px 16px 40px;gap:20px;max-width:100vw;
 }
 #overlay.show{opacity:1;pointer-events:all;}
 @media(max-width:700px){
-  #overlay{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;justify-content:flex-start;padding:32px 16px 60px;}
+  #overlay{overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;justify-content:flex-start;padding:24px 16px 60px;touch-action:pan-y;}
 }
 #ov-logo{font-size:clamp(2rem,8vw,3.5rem);font-weight:700;letter-spacing:.4em;color:var(--gold);text-shadow:0 0 40px rgba(255,196,0,.4);}
 #ov-title{font-size:clamp(1.1rem,4vw,1.8rem);font-weight:700;letter-spacing:.25em;color:#fff;text-transform:uppercase;text-align:center;}
@@ -194,7 +194,10 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 #ov-challenges{display:flex;flex-direction:column;gap:6px;width:min(420px,94vw);max-width:100%;max-height:260px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 #ov-challenges::-webkit-scrollbar{width:4px;}
 #ov-challenges::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-@media(max-width:700px){#ov-challenges{max-height:none;overflow-y:visible;}}
+@media(max-width:700px){
+  #ov-challenges{max-height:none;overflow:visible;}
+  #overlay *{max-width:100%;}
+}
 
 .challenge-lbl{font-size:.68rem;letter-spacing:.14em;color:#ccd6f0;text-transform:uppercase;}
 #challengesList{display:flex;flex-direction:column;gap:3px;}
