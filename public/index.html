@@ -601,26 +601,39 @@ function parseYahooCSV(text) {
     return null;
   }
 
-  // Find the header row: new Yahoo format has metadata rows like "Ticker,WFC" before the real headers
-  var headerIdx=-1;
+  // ── Find the header row and first data row ──
+  // Yahoo Finance CSVs can have:
+  //   Format A: row0=headers (Date,Adj Close,...), row1=data
+  //   Format B: row0=headers (Date,Adj Close,...), row1=ticker row (ZM,ZM,...), row2=data
+  //   Format C: row0=metadata (Ticker,WFC), row1=headers, row2=data
+
+  var headerIdx=-1, dataStartIdx=-1;
   for(var i=0;i<Math.min(allLines.length,10);i++){
     var cols=splitRow(allLines[i]).map(function(c){return c.toLowerCase();});
-    if(cols[0]==='date'||cols[0]==='price'||
-       (cols.indexOf('date')!==-1&&(cols.indexOf('close')!==-1||cols.indexOf('adj close')!==-1))){
-      headerIdx=i; break;
-    }
-  }
-  // Fallback: first row whose col[0] parses as a date => header is the row before
-  if(headerIdx===-1){
-    for(var j=1;j<Math.min(allLines.length,10);j++){
-      if(normalizeDate(splitRow(allLines[j])[0])){ headerIdx=j-1; break; }
+    // This row is a header if it contains "date" or "price" as the first column
+    if(cols[0]==='date'||cols[0]==='price'){
+      headerIdx=i;
+      // Now find the first data row after the header (skip any ticker/label rows)
+      for(var j=i+1;j<Math.min(allLines.length,i+5);j++){
+        if(normalizeDate(splitRow(allLines[j])[0])){
+          dataStartIdx=j; break;
+        }
+      }
+      break;
     }
   }
   if(headerIdx===-1) headerIdx=0;
+  if(dataStartIdx===-1){
+    // fallback: find first row after header that looks like a date
+    for(var k=headerIdx+1;k<allLines.length;k++){
+      if(normalizeDate(splitRow(allLines[k])[0])){ dataStartIdx=k; break; }
+    }
+  }
+  if(dataStartIdx===-1) dataStartIdx=headerIdx+1;
 
   var rawHeaders=splitRow(allLines[headerIdx]).map(function(h){return h.toLowerCase();});
   var dateIdx=rawHeaders.indexOf('date');
-  if(dateIdx===-1) dateIdx=rawHeaders.indexOf('price'); // new Yahoo uses "Price" as the date column label
+  if(dateIdx===-1) dateIdx=rawHeaders.indexOf('price');
   if(dateIdx===-1) dateIdx=0;
 
   var closeIdx=rawHeaders.indexOf('adj close');
@@ -634,7 +647,7 @@ function parseYahooCSV(text) {
   if(closeIdx===-1) throw new Error('No Close column. Headers: '+rawHeaders.join(', '));
 
   var prices=[],dates=[];
-  for(var r=headerIdx+1;r<allLines.length;r++){
+  for(var r=dataStartIdx;r<allLines.length;r++){
     var row=splitRow(allLines[r]);
     if(row.length<=Math.max(dateIdx,closeIdx)) continue;
     var dateStr=normalizeDate(row[dateIdx]); if(!dateStr) continue;
