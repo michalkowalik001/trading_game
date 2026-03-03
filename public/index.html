@@ -422,13 +422,15 @@ function isUnlocked(){
 }
 
 function checkUnlockOnLoad(){
-  // Check if returning from Stripe with ?unlocked=true
-  const params = new URLSearchParams(window.location.search);
-  if(params.get('unlocked')==='true'){
-    localStorage.setItem(LS_KEY,'1');
-    // Clean URL
-    window.history.replaceState({},'',window.location.pathname);
-  }
+  try{
+    // Check if returning from Stripe with ?unlocked=true
+    var search=window.location.search||'';
+    if(search.indexOf('unlocked=true')!==-1){
+      localStorage.setItem(LS_KEY,'1');
+      // Clean URL — wrap in try/catch, Safari can reject this
+      try{ window.history.replaceState(null,'',window.location.pathname); }catch(e){}
+    }
+  }catch(e){ /* ignore — not critical */ }
 }
 
 function handleStripeClick(){
@@ -457,6 +459,37 @@ function showPaywall(){
 function hidePaywall(){
   document.getElementById('paywall').classList.remove('show');
 }
+
+// ─── STOCK NAMES ─────────────────────────────────────────────────────────────
+const STOCK_NAMES = {
+  "AAPL":"Apple","ABNB":"Airbnb","AIR.PA":"Airbus","AMD":"AMD",
+  "AMZN":"Amazon","ASML":"ASML","BA":"Boeing","BABA":"Alibaba",
+  "BAC":"Bank of America","BHP":"BHP Group","BIDU":"Baidu",
+  "BRK-A":"Berkshire Hathaway A","BRK-B":"Berkshire Hathaway B",
+  "BTC-USD":"Bitcoin","C":"Citigroup","CAT":"Caterpillar",
+  "COIN":"Coinbase","CRM":"Salesforce","CVX":"Chevron",
+  "DIA":"Dow Jones ETF","DIS":"Disney","DOGE-USD":"Dogecoin",
+  "EEM":"Emerging Markets ETF","ETH-USD":"Ethereum","EURUSD=X":"EUR/USD",
+  "F":"Ford","GBPUSD=X":"GBP/USD","GE":"GE Aerospace","GLD":"Gold ETF",
+  "GM":"General Motors","GOOG":"Alphabet C","GOOGL":"Alphabet A",
+  "HD":"Home Depot","HYG":"High Yield Bond ETF","INTC":"Intel",
+  "ITUB":"Itaú Unibanco","IWM":"Russell 2000 ETF","JNJ":"Johnson & Johnson",
+  "JPM":"JPMorgan Chase","JPY=X":"USD/JPY","KO":"Coca-Cola","LI":"Li Auto",
+  "LTC-USD":"Litecoin","LYFT":"Lyft","MA":"Mastercard","META":"Meta",
+  "MMM":"3M","MSFT":"Microsoft","NFLX":"Netflix","NIO":"NIO","NKE":"Nike",
+  "NVDA":"Nvidia","ORCL":"Oracle","PEP":"PepsiCo","PG":"Procter & Gamble",
+  "PLTR":"Palantir","QQQ":"Nasdaq 100 ETF","RIO":"Rio Tinto","RIVN":"Rivian",
+  "SAN.PA":"Sanofi","SAP.DE":"SAP","SAP":"SAP","SHOP":"Shopify",
+  "SLV":"Silver ETF","SNAP":"Snap","SNY":"Sanofi ADR",
+  "SOXX":"Semiconductor ETF","SPY":"S&P 500 ETF","T":"AT&T",
+  "TCEHY":"Tencent","TLT":"20Y Treasury ETF","TMUS":"T-Mobile",
+  "TSLA":"Tesla","TSM":"TSMC","UBER":"Uber","ULVR.L":"Unilever",
+  "UNG":"Natural Gas ETF","UNH":"UnitedHealth","USO":"Oil ETF","V":"Visa",
+  "VLO":"Valero Energy","VZ":"Verizon","WFC":"Wells Fargo","XOM":"ExxonMobil",
+  "XPEV":"XPeng","XRP-USD":"XRP","ZM":"Zoom",
+  "^FTSE":"FTSE 100","^GDAXI":"DAX 40","^GSPTSE":"S&P/TSX","^N225":"Nikkei 225"
+};
+function stockName(sym){ return STOCK_NAMES[sym]||sym; }
 
 // ─── CHALLENGES ──────────────────────────────────────────────────────────────
 const CHALLENGE_GROUPS = [
@@ -707,7 +740,8 @@ async function loadStocks(){
   }catch(e){
     loadingText.textContent='ERROR';
     loadingErr.style.display='block';
-    loadingErr.textContent=e.message;
+    loadingErr.textContent=e.message+' | stack: '+(e.stack||'').split('\n')[1];
+    console.error('loadStocks failed:',e);
   }
 }
 
@@ -957,7 +991,7 @@ function updateHUD(){
   document.getElementById('hBalance').textContent=fmtFull(balance);
   document.getElementById('hBalanceShort').textContent=fmtShort(balance);
   document.getElementById('hRound').textContent=roundNum;
-  document.getElementById('hStock').textContent=currentSym;
+  document.getElementById('hStock').textContent=stockName(currentSym);
   // Mirror to mobile row 2
   [['hOpenMob','hOpen'],['hSessionTimeMob','hSessionTime'],['hRoundMob','hRound'],['hStockMob','hStock']].forEach(function(pair){
     var ms=document.getElementById(pair[0]),ds=document.getElementById(pair[1]);
@@ -1133,7 +1167,7 @@ function showOverlay(isFirst,roundPnL){
     }else{ gEl.textContent='—'; gEl.className='ov-card-val'; }
 
     pickNextStock();
-    document.getElementById('ov-stock').textContent=currentSym;
+    document.getElementById('ov-stock').textContent=stockName(currentSym);
     document.getElementById('ov-round').textContent=roundNum+1;
     document.getElementById('ov-btn').textContent='NEXT ROUND →';
   }
