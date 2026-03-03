@@ -68,19 +68,28 @@ html,body{
   border-bottom:1px solid var(--border);
   background:var(--panel);
 }
-.hud-row{
-  display:flex;overflow-x:auto;scrollbar-width:none;
-  border-bottom:1px solid var(--border);
-}
-.hud-row:last-child{border-bottom:none;}
+/* Desktop: single row */
+.hud-row{ display:flex;overflow-x:auto;scrollbar-width:none; }
 .hud-row::-webkit-scrollbar{display:none;}
+/* Hide second row on desktop */
+#hud-row2{ display:none; }
+@media(max-width:700px){
+  /* Mobile: both rows shown, each scrollable, with divider */
+  #hud-row1{ border-bottom:1px solid var(--border); }
+  #hud-row2{ display:flex; }
+}
 .hud-cell{
-  padding:4px 10px;border-right:1px solid var(--border);
+  padding:5px 12px;border-right:1px solid var(--border);
   display:flex;flex-direction:column;gap:1px;flex-shrink:0;
 }
 .hud-cell:last-child{border-right:none;}
-.hud-lbl{font-size:.48rem;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;white-space:nowrap;}
-.hud-val{font-size:.76rem;font-weight:700;color:#fff;white-space:nowrap;}
+.hud-lbl{font-size:.50rem;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;white-space:nowrap;}
+.hud-val{font-size:.82rem;font-weight:700;color:#fff;white-space:nowrap;}
+@media(max-width:700px){
+  .hud-cell{ padding:4px 10px; }
+  .hud-lbl{ font-size:.46rem; }
+  .hud-val{ font-size:.74rem; }
+}
 .hud-val.green{color:var(--green);}
 .hud-val.red{color:var(--red);}
 
@@ -177,9 +186,12 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 #ov-balance-input{color:var(--gold);}
 
 /* challenges — compact list */
-#ov-challenges{display:flex;flex-direction:column;gap:8px;width:min(400px,90vw);max-height:240px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+#ov-challenges{display:flex;flex-direction:column;gap:6px;width:min(420px,94vw);max-height:280px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+#ov-challenges::-webkit-scrollbar{width:4px;}
+#ov-challenges::-webkit-scrollbar-track{background:transparent;}
+#ov-challenges::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 .challenge-lbl{font-size:.62rem;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;}
-#challengesList{display:flex;flex-direction:column;gap:4px;}
+#challengesList{display:flex;flex-direction:column;gap:3px;}
 .ch-btn{
   font-family:'IBM Plex Mono',monospace;font-size:.75rem;font-weight:600;
   background:var(--panel);border:1px solid var(--border);color:var(--text);
@@ -187,6 +199,11 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
   transition:border-color .1s,background .1s;touch-action:manipulation;
   display:flex;align-items:center;justify-content:space-between;gap:8px;
 }
+.ch-group-hdr{
+  font-size:.58rem;letter-spacing:.16em;color:var(--dim);text-transform:uppercase;
+  padding:8px 2px 4px;border-bottom:1px solid var(--border);margin-top:4px;
+}
+.ch-group-hdr:first-child{margin-top:0;}
 .ch-btn:active{background:#1a2235;}
 .ch-btn.selected{border-color:var(--gold);background:rgba(255,196,0,.07);}
 .ch-name{color:#fff;letter-spacing:.04em;}
@@ -224,6 +241,33 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
   box-shadow:0 0 40px rgba(255,196,0,.6);
 }
 #goalToast.show{opacity:1;}
+
+/* ── PAYWALL ── */
+#paywall{
+  position:fixed;inset:0;z-index:110;background:rgba(4,6,10,.97);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;opacity:0;pointer-events:none;transition:opacity .3s;
+  padding:24px;
+}
+#paywall.show{opacity:1;pointer-events:all;}
+#paywall-title{font-size:clamp(1.4rem,5vw,2.2rem);font-weight:700;letter-spacing:.2em;color:#fff;text-align:center;}
+#paywall-sub{font-size:.82rem;color:var(--dim);letter-spacing:.08em;text-align:center;max-width:360px;line-height:1.7;}
+#paywall-price{font-size:clamp(2rem,8vw,3.5rem);font-weight:700;color:var(--gold);text-shadow:0 0 40px rgba(255,196,0,.4);}
+#paywall-btn{
+  font-family:'IBM Plex Mono',monospace;font-size:1rem;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;
+  background:var(--gold);color:#000;border:none;
+  padding:16px 48px;border-radius:3px;cursor:pointer;
+  touch-action:manipulation;text-decoration:none;display:inline-block;
+  transition:opacity .1s,transform .1s;
+}
+#paywall-btn:active{opacity:.85;transform:scale(.98);}
+#paywall-rounds{font-size:.68rem;color:var(--dim);letter-spacing:.1em;}
+#paywall-restore{
+  font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--dim);
+  background:transparent;border:none;cursor:pointer;letter-spacing:.1em;
+  text-decoration:underline;touch-action:manipulation;
+}
 
 /* LOADING */
 #loading{
@@ -265,20 +309,24 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
     </div>
   </div>
 
-  <!-- HUD: two scrollable rows -->
+  <!-- HUD: one row desktop / two rows mobile -->
   <div id="hud">
-    <div class="hud-row">
+    <div class="hud-row" id="hud-row1">
       <div class="hud-cell"><span class="hud-lbl">Balance</span><span class="hud-val" id="hBalance">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Bal. Short</span><span class="hud-val" id="hBalanceShort">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Round P&amp;L</span><span class="hud-val" id="hRoundPnl">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Session P&amp;L</span><span class="hud-val" id="hPnl">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Goal Progress</span><span class="hud-val" id="hGoalPct">—</span></div>
+      <div class="hud-cell" id="hud-open-desktop"><span class="hud-lbl">Open P&amp;L</span><span class="hud-val" id="hOpen">—</span></div>
+      <div class="hud-cell" id="hud-time-desktop"><span class="hud-lbl">Time</span><span class="hud-val" id="hSessionTime">00:00</span></div>
+      <div class="hud-cell" id="hud-round-desktop"><span class="hud-lbl">Round</span><span class="hud-val" id="hRound">—</span></div>
+      <div class="hud-cell" id="hud-stock-desktop"><span class="hud-lbl">Stock</span><span class="hud-val" id="hStock" style="color:var(--gold)">—</span></div>
     </div>
-    <div class="hud-row">
-      <div class="hud-cell"><span class="hud-lbl">Open P&amp;L</span><span class="hud-val" id="hOpen">—</span></div>
-      <div class="hud-cell"><span class="hud-lbl">Time</span><span class="hud-val" id="hSessionTime">00:00</span></div>
-      <div class="hud-cell"><span class="hud-lbl">Round</span><span class="hud-val" id="hRound">—</span></div>
-      <div class="hud-cell"><span class="hud-lbl">Stock</span><span class="hud-val" id="hStock" style="color:var(--gold)">—</span></div>
+    <div class="hud-row" id="hud-row2">
+      <div class="hud-cell"><span class="hud-lbl">Open P&amp;L</span><span class="hud-val" id="hOpenMob">—</span></div>
+      <div class="hud-cell"><span class="hud-lbl">Time</span><span class="hud-val" id="hSessionTimeMob">00:00</span></div>
+      <div class="hud-cell"><span class="hud-lbl">Round</span><span class="hud-val" id="hRoundMob">—</span></div>
+      <div class="hud-cell"><span class="hud-lbl">Stock</span><span class="hud-val" id="hStockMob" style="color:var(--gold)">—</span></div>
     </div>
   </div>
 
@@ -301,6 +349,17 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 
 <!-- GOAL TOAST -->
 <div id="goalToast">🎉 GOAL REACHED!</div>
+
+<!-- PAYWALL -->
+<div id="paywall">
+  <div id="paywall-title">FREE ROUNDS USED UP</div>
+  <div id="paywall-sub">You've played 10 free rounds.<br>Unlock unlimited play for a one-time payment.</div>
+  <div id="paywall-price">$2.99</div>
+  <!-- REPLACE href WITH YOUR STRIPE PAYMENT LINK -->
+  <a id="paywall-btn" href="https://buy.stripe.com/YOUR_LINK_HERE" target="_blank" onclick="handleStripeClick()">UNLOCK UNLIMITED ↗</a>
+  <div id="paywall-rounds">Round 10 of 10 free rounds played</div>
+  <button id="paywall-restore" onclick="checkRestore()">Already paid? Restore access</button>
+</div>
 
 <!-- PAUSE SCREEN -->
 <div id="pauseScreen">
@@ -333,7 +392,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
     </div>
     <div class="setup-row">
       <span class="setup-lbl">Balance Goal $</span>
-      <input class="setup-input" id="ov-goal-input" type="text" inputmode="decimal" placeholder="200.00" onclick="event.stopPropagation()"/>
+      <input class="setup-input" id="ov-goal-input" type="text" inputmode="decimal" placeholder="—" onclick="event.stopPropagation()"/>
     </div>
   </div>
 
@@ -354,18 +413,140 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 <script>
 'use strict';
 
+// ─── PAYMENT / UNLOCK ────────────────────────────────────────────────────────
+const FREE_ROUNDS = 10;
+const LS_KEY = 'trader_unlocked';
+
+function isUnlocked(){
+  return localStorage.getItem(LS_KEY) === '1';
+}
+
+function checkUnlockOnLoad(){
+  // Check if returning from Stripe with ?unlocked=true
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('unlocked')==='true'){
+    localStorage.setItem(LS_KEY,'1');
+    // Clean URL
+    window.history.replaceState({},'',window.location.pathname);
+  }
+}
+
+function handleStripeClick(){
+  // After Stripe redirects back, ?unlocked=true will be in the URL
+  // Nothing to do here — the redirect handles it
+}
+
+function checkRestore(){
+  // User claims they paid — check URL param or prompt
+  const code = prompt('Paste the confirmation from your payment email (or visit the original payment link again):');
+  if(code && code.includes('paid')){
+    localStorage.setItem(LS_KEY,'1');
+    hidePaywall();
+    startRound();
+  } else {
+    // Fallback: just re-open Stripe link
+    alert("Please use the original payment link. After payment you'll be redirected back automatically.");
+  }
+}
+
+function showPaywall(){
+  document.getElementById('paywall').classList.add('show');
+  document.getElementById('paywall-rounds').textContent='Round '+FREE_ROUNDS+' of '+FREE_ROUNDS+' free rounds played';
+}
+
+function hidePaywall(){
+  document.getElementById('paywall').classList.remove('show');
+}
+
 // ─── CHALLENGES ──────────────────────────────────────────────────────────────
-const CHALLENGES = [
-  { name:'⚡ Quick Flip',   goal:200,              balance:100,   label:'$200' },
-  { name:'🪙 Millionaire',  goal:1000000,          balance:100,   label:'$1MM' },
-  { name:'🏦 Billionaire',  goal:1000000000,       balance:100,   label:'$1B' },
-  { name:'🇵🇱 Poland GDP',  goal:880000000000,     balance:100,   label:'$880B' },
-  { name:'🇩🇪 Germany GDP', goal:4600000000000,    balance:100,   label:'$4.6T' },
-  { name:'🇨🇳 China GDP',   goal:18500000000000,   balance:100,   label:'$18.5T' },
-  { name:'🇺🇸 US GDP',      goal:29000000000000,   balance:100,   label:'$29T' },
-  { name:'🚀 Moon Shot',    goal:1000000000,       balance:1,     label:'$1B from $1' },
-  { name:'💼 Hedge Fund',   goal:10000000000,      balance:10000, label:'$10B from $10K' },
+const CHALLENGE_GROUPS = [
+  {
+    group: '🎯 Personal Goals',
+    items: [
+      { name:'⚡ Quick Flip',    goal:200,             balance:100,   label:'$200' },
+      { name:'🪙 Millionaire',   goal:1000000,         balance:100,   label:'$1MM' },
+      { name:'🏦 Billionaire',   goal:1000000000,      balance:100,   label:'$1B' },
+      { name:'🚀 Moon Shot',     goal:1000000000,      balance:1,     label:'$1B from $1' },
+      { name:'💼 Hedge Fund',    goal:10000000000,     balance:10000, label:'$10B' },
+      { name:'🌍 Trillionaire',  goal:1000000000000,   balance:100,   label:'$1T' },
+    ]
+  },
+  {
+    group: '🌎 Americas',
+    items: [
+      { name:'🇺🇸 United States', goal:29000000000000,  balance:100, label:'$29T' },
+      { name:'🇧🇷 Brazil',        goal:2100000000000,   balance:100, label:'$2.1T' },
+      { name:'🇨🇦 Canada',        goal:2100000000000,   balance:100, label:'$2.1T' },
+      { name:'🇲🇽 Mexico',        goal:1400000000000,   balance:100, label:'$1.4T' },
+      { name:'🇦🇷 Argentina',     goal:640000000000,    balance:100, label:'$640B' },
+      { name:'🇨🇴 Colombia',      goal:360000000000,    balance:100, label:'$360B' },
+      { name:'🇨🇱 Chile',         goal:340000000000,    balance:100, label:'$340B' },
+      { name:'🇵🇪 Peru',          goal:270000000000,    balance:100, label:'$270B' },
+    ]
+  },
+  {
+    group: '🌍 Europe',
+    items: [
+      { name:'🇩🇪 Germany',       goal:4600000000000,   balance:100, label:'$4.6T' },
+      { name:'🇬🇧 UK',            goal:3300000000000,   balance:100, label:'$3.3T' },
+      { name:'🇫🇷 France',        goal:3100000000000,   balance:100, label:'$3.1T' },
+      { name:'🇮🇹 Italy',         goal:2200000000000,   balance:100, label:'$2.2T' },
+      { name:'🇷🇺 Russia',        goal:2000000000000,   balance:100, label:'$2T' },
+      { name:'🇪🇸 Spain',         goal:1600000000000,   balance:100, label:'$1.6T' },
+      { name:'🇳🇱 Netherlands',   goal:1100000000000,   balance:100, label:'$1.1T' },
+      { name:'🇨🇭 Switzerland',   goal:870000000000,    balance:100, label:'$870B' },
+      { name:'🇵🇱 Poland',        goal:880000000000,    balance:100, label:'$880B' },
+      { name:'🇸🇪 Sweden',        goal:590000000000,    balance:100, label:'$590B' },
+      { name:'🇧🇪 Belgium',       goal:630000000000,    balance:100, label:'$630B' },
+      { name:'🇳🇴 Norway',        goal:550000000000,    balance:100, label:'$550B' },
+      { name:'🇦🇹 Austria',       goal:520000000000,    balance:100, label:'$520B' },
+      { name:'🇩🇰 Denmark',       goal:420000000000,    balance:100, label:'$420B' },
+      { name:'🇫🇮 Finland',       goal:300000000000,    balance:100, label:'$300B' },
+      { name:'🇵🇹 Portugal',      goal:280000000000,    balance:100, label:'$280B' },
+      { name:'🇨🇿 Czech Rep.',    goal:330000000000,    balance:100, label:'$330B' },
+      { name:'🇷🇴 Romania',       goal:350000000000,    balance:100, label:'$350B' },
+      { name:'🇬🇷 Greece',        goal:240000000000,    balance:100, label:'$240B' },
+      { name:'🇭🇺 Hungary',       goal:210000000000,    balance:100, label:'$210B' },
+      { name:'🇺🇦 Ukraine',       goal:180000000000,    balance:100, label:'$180B' },
+    ]
+  },
+  {
+    group: '🌏 Asia & Pacific',
+    items: [
+      { name:'🇨🇳 China',         goal:18500000000000,  balance:100, label:'$18.5T' },
+      { name:'🇯🇵 Japan',         goal:4200000000000,   balance:100, label:'$4.2T' },
+      { name:'🇮🇳 India',         goal:3700000000000,   balance:100, label:'$3.7T' },
+      { name:'🇰🇷 South Korea',   goal:1700000000000,   balance:100, label:'$1.7T' },
+      { name:'🇦🇺 Australia',     goal:1700000000000,   balance:100, label:'$1.7T' },
+      { name:'🇮🇩 Indonesia',     goal:1400000000000,   balance:100, label:'$1.4T' },
+      { name:'🇸🇦 Saudi Arabia',  goal:1100000000000,   balance:100, label:'$1.1T' },
+      { name:'🇹🇷 Turkey',        goal:1100000000000,   balance:100, label:'$1.1T' },
+      { name:'🇹🇼 Taiwan',        goal:750000000000,    balance:100, label:'$750B' },
+      { name:'🇸🇬 Singapore',     goal:500000000000,    balance:100, label:'$500B' },
+      { name:'🇹🇭 Thailand',      goal:500000000000,    balance:100, label:'$500B' },
+      { name:'🇲🇾 Malaysia',      goal:430000000000,    balance:100, label:'$430B' },
+      { name:'🇵🇭 Philippines',   goal:430000000000,    balance:100, label:'$430B' },
+      { name:'🇻🇳 Vietnam',       goal:430000000000,    balance:100, label:'$430B' },
+      { name:'🇵🇰 Pakistan',      goal:340000000000,    balance:100, label:'$340B' },
+      { name:'🇳🇿 New Zealand',   goal:250000000000,    balance:100, label:'$250B' },
+      { name:'🇦🇪 UAE',           goal:500000000000,    balance:100, label:'$500B' },
+      { name:'🇮🇱 Israel',        goal:520000000000,    balance:100, label:'$520B' },
+    ]
+  },
+  {
+    group: '🌍 Africa',
+    items: [
+      { name:'🇳🇬 Nigeria',       goal:390000000000,    balance:100, label:'$390B' },
+      { name:'🇿🇦 South Africa',  goal:380000000000,    balance:100, label:'$380B' },
+      { name:'🇪🇬 Egypt',         goal:390000000000,    balance:100, label:'$390B' },
+      { name:'🇪🇹 Ethiopia',      goal:160000000000,    balance:100, label:'$160B' },
+      { name:'🇰🇪 Kenya',         goal:110000000000,    balance:100, label:'$110B' },
+      { name:'🇬🇭 Ghana',         goal:76000000000,     balance:100, label:'$76B' },
+    ]
+  },
 ];
+// Flat list for backward compat
+const CHALLENGES = CHALLENGE_GROUPS.flatMap(g=>g.items);
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 const fmt = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -439,6 +620,16 @@ function parseYahooCSV(text) {
 const STOCK_COLORS=['#4a9eff','#f5a623','#76ff03','#e879f9','#fb923c','#60a5fa','#34d399','#f472b6','#a78bfa','#fbbf24','#38bdf8','#4ade80'];
 let STOCK_POOL=[], SYMS=[];
 
+async function fetchStock(sym,idx){
+  try{
+    const csvRes=await fetch('/stocks/'+encodeURIComponent(sym)+'.csv');
+    if(!csvRes.ok) throw new Error('HTTP '+csvRes.status);
+    const{prices,dates}=parseYahooCSV(await csvRes.text());
+    STOCK_POOL.push({sym,name:sym,color:STOCK_COLORS[idx%STOCK_COLORS.length],prices,dates});
+    SYMS=STOCK_POOL.map(s=>s.sym);
+  }catch(e){ console.warn('Skipping '+sym+':',e.message); }
+}
+
 async function loadStocks(){
   const loadingEl=document.getElementById('loading');
   const loadingText=document.getElementById('loading-text');
@@ -450,21 +641,24 @@ async function loadStocks(){
     if(!listRes.ok) throw new Error('Could not load /stocks/index.json (HTTP '+listRes.status+')');
     const stocks=await listRes.json();
     if(!Array.isArray(stocks)||stocks.length===0) throw new Error('index.json is empty');
-    for(let i=0;i<stocks.length;i++){
-      const sym=stocks[i];
-      loadingText.textContent='LOADING '+sym+'... ('+(i+1)+'/'+stocks.length+')';
-      loadingFill.style.width=((i+1)/stocks.length*100)+'%';
-      try{
-        const csvRes=await fetch('/stocks/'+encodeURIComponent(sym)+'.csv');
-        if(!csvRes.ok) throw new Error('HTTP '+csvRes.status);
-        const{prices,dates}=parseYahooCSV(await csvRes.text());
-        STOCK_POOL.push({sym,name:sym,color:STOCK_COLORS[i%STOCK_COLORS.length],prices,dates});
-      }catch(e){ console.warn('Skipping '+sym+':',e.message); }
+
+    // ── PHASE 1: load first 5 stocks before showing UI ──
+    const EAGER=Math.min(5,stocks.length);
+    for(let i=0;i<EAGER;i++){
+      loadingText.textContent='LOADING '+stocks[i]+'... ('+(i+1)+'/'+EAGER+')';
+      loadingFill.style.width=((i+1)/EAGER*100)+'%';
+      await fetchStock(stocks[i],i);
     }
-    if(STOCK_POOL.length===0) throw new Error('All CSVs failed to parse');
-    SYMS=STOCK_POOL.map(s=>s.sym);
+    if(STOCK_POOL.length===0) throw new Error('All initial CSVs failed');
     loadingEl.classList.add('hide');
     init();
+
+    // ── PHASE 2: load remaining stocks quietly in background ──
+    for(let i=EAGER;i<stocks.length;i++){
+      await fetchStock(stocks[i],i);
+      // small yield so it doesn't block the game
+      await new Promise(r=>setTimeout(r,50));
+    }
   }catch(e){
     loadingText.textContent='ERROR';
     loadingErr.style.display='block';
@@ -719,6 +913,11 @@ function updateHUD(){
   document.getElementById('hBalanceShort').textContent=fmtShort(balance);
   document.getElementById('hRound').textContent=roundNum;
   document.getElementById('hStock').textContent=currentSym;
+  // Mirror to mobile row 2
+  [['hOpenMob','hOpen'],['hSessionTimeMob','hSessionTime'],['hRoundMob','hRound'],['hStockMob','hStock']].forEach(function(pair){
+    var ms=document.getElementById(pair[0]),ds=document.getElementById(pair[1]);
+    if(ms&&ds){ms.textContent=ds.textContent;ms.className=ds.className;}
+  });
   document.getElementById('stockTag').textContent=currentSym;
   if(cur){
     document.getElementById('livePrice').textContent=fmt(cur);
@@ -899,6 +1098,7 @@ function showOverlay(isFirst,roundPnL){
 function hideOverlay(){ overlay.classList.remove('show'); }
 
 function startFromOverlay(){
+  hidePaywall();
   if(roundNum===0){
     const b=parseInputNum('ov-balance-input');
     if(b!=null&&b>=0.01&&b<=1000000){
@@ -931,18 +1131,26 @@ overlay.addEventListener('click',e=>{
 // ─── CHALLENGES ───────────────────────────────────────────────────────────────
 function buildChallenges(){
   const list=document.getElementById('challengesList');
-  CHALLENGES.forEach(ch=>{
-    const btn=document.createElement('button');
-    btn.className='ch-btn';
-    btn.innerHTML=`<span class="ch-name">${ch.name}</span><span class="ch-goal">Reach ${ch.label} · Start ${fmtShort(ch.balance)}</span>`;
-    btn.addEventListener('click',e=>{
-      e.stopPropagation();
-      document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('selected'));
-      btn.classList.add('selected');
-      document.getElementById('ov-goal-input').value=ch.goal;
-      document.getElementById('ov-balance-input').value=ch.balance;
+  CHALLENGE_GROUPS.forEach(group=>{
+    // Group header
+    const hdr=document.createElement('div');
+    hdr.className='ch-group-hdr';
+    hdr.textContent=group.group;
+    list.appendChild(hdr);
+    // Items
+    group.items.forEach(ch=>{
+      const btn=document.createElement('button');
+      btn.className='ch-btn';
+      btn.innerHTML=`<span class="ch-name">${ch.name}</span><span class="ch-goal">→ ${ch.label}</span>`;
+      btn.addEventListener('click',e=>{
+        e.stopPropagation();
+        document.querySelectorAll('.ch-btn').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('ov-goal-input').value=ch.goal;
+        document.getElementById('ov-balance-input').value=ch.balance;
+      });
+      list.appendChild(btn);
     });
-    list.appendChild(btn);
   });
 }
 
@@ -976,7 +1184,12 @@ function endRound(){
   running=false; clearTimeout(tickHandle);
   if(holding) sell();
   const roundPnL=+(balance-balanceAtRoundStart).toFixed(2);
-  setTimeout(()=>showOverlay(false,roundPnL),400);
+  // Check paywall BEFORE showing round overlay
+  if(!isUnlocked() && roundNum>=FREE_ROUNDS){
+    setTimeout(()=>showPaywall(),400);
+  } else {
+    setTimeout(()=>showOverlay(false,roundPnL),400);
+  }
 }
 
 function tick(){
@@ -998,6 +1211,7 @@ function init(){
   showOverlay(true,0);
 }
 
+checkUnlockOnLoad();
 loadStocks();
 </script>
 </body>
