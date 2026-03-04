@@ -63,6 +63,21 @@ html,body{
 .ctrl-btn:active{background:rgba(255,255,255,.2);}
 #pauseBtn.paused{background:rgba(255,196,0,.15);border-color:var(--gold);color:var(--gold);}
 
+/* ── DESKTOP BALANCE BAR ── */
+#balanceBar{
+  flex:0 0 auto;
+  display:none; /* hidden on mobile */
+  background:var(--panel);border-bottom:1px solid var(--border);
+  padding:6px 18px;align-items:baseline;gap:14px;
+}
+@media(min-width:701px){
+  #balanceBar{display:flex;}
+}
+#balanceBarLabel{font-size:.55rem;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;}
+#balanceBarVal{font-size:1.6rem;font-weight:700;color:var(--gold);letter-spacing:.04em;font-variant-numeric:tabular-nums;}
+#balanceBarPnl{font-size:.85rem;font-weight:700;letter-spacing:.04em;}
+#balanceBarGoal{font-size:.7rem;color:var(--dim);letter-spacing:.06em;margin-left:auto;}
+
 /* ── HUD ── */
 #hud{
   flex:0 0 auto;
@@ -239,6 +254,20 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 #ov-play-btn:active{background:#1a2235;}
 #ov-click-hint{font-size:.64rem;color:#6a7a90;letter-spacing:.1em;}
 
+/* ── HOW TO PLAY ── */
+#howToPlay{
+  display:none;position:fixed;inset:0;z-index:300;background:rgba(4,6,10,.98);
+  overflow-y:auto;padding:40px 24px;font-family:'IBM Plex Mono',monospace;color:var(--text);
+}
+#howToPlay .htp-inner{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:20px;}
+#howToPlay h1{font-size:1.4rem;font-weight:700;letter-spacing:.2em;color:var(--gold);}
+.htp-step{display:flex;gap:16px;align-items:flex-start;}
+.htp-num{font-size:1.4rem;font-weight:700;color:var(--gold);flex-shrink:0;width:28px;}
+.htp-text strong{display:block;color:#fff;font-size:.85rem;letter-spacing:.06em;margin-bottom:4px;}
+.htp-text p{font-size:.78rem;color:#aabbcc;line-height:1.8;letter-spacing:.03em;}
+.htp-tip{background:rgba(255,196,0,.06);border:1px solid rgba(255,196,0,.2);border-radius:4px;padding:14px 18px;}
+.htp-tip p{font-size:.75rem;color:#ccd6f0;line-height:1.8;}
+
 /* GOAL TOAST */
 #goalToast{
   position:fixed;top:60px;left:50%;transform:translateX(-50%);
@@ -318,6 +347,14 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
     </div>
   </div>
 
+  <!-- DESKTOP BALANCE BAR -->
+  <div id="balanceBar">
+    <span id="balanceBarLabel">Balance</span>
+    <span id="balanceBarVal">$100.00</span>
+    <span id="balanceBarPnl"></span>
+    <span id="balanceBarGoal"></span>
+  </div>
+
   <!-- HUD: one row desktop / two rows mobile -->
   <div id="hud">
     <div class="hud-row" id="hud-row1">
@@ -384,6 +421,56 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
     <button onclick="document.getElementById('terms').style.display='block'"
       style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--dim);background:transparent;border:none;cursor:pointer;letter-spacing:.08em;text-decoration:underline;">
       Terms &amp; Conditions
+    </button>
+  </div>
+</div>
+
+<!-- HOW TO PLAY -->
+<div id="howToPlay">
+  <div class="htp-inner">
+    <h1>HOW TO PLAY</h1>
+    <div class="htp-step">
+      <div class="htp-num">1</div>
+      <div class="htp-text">
+        <strong>SET YOUR GOAL</strong>
+        <p>Enter a starting balance and a target balance goal — or just pick a challenge from the list. You can also hit "Just Play" to skip the goal entirely.</p>
+      </div>
+    </div>
+    <div class="htp-step">
+      <div class="htp-num">2</div>
+      <div class="htp-text">
+        <strong>WATCH THE CHART</strong>
+        <p>A real stock chart plays out in real time over 30 seconds. The ticker and time period are hidden — you're trading blind, just like gut-feel trading.</p>
+      </div>
+    </div>
+    <div class="htp-step">
+      <div class="htp-num">3</div>
+      <div class="htp-text">
+        <strong>HOLD TO BUY · RELEASE TO SELL</strong>
+        <p>Press and hold anywhere on the chart to open a long position. Release to close it and lock in your profit or loss. You can only hold one position at a time.</p>
+      </div>
+    </div>
+    <div class="htp-step">
+      <div class="htp-num">4</div>
+      <div class="htp-text">
+        <strong>SURVIVE THE ROUND</strong>
+        <p>Each round lasts 30 seconds. Your balance carries over between rounds. Try to grow it as much as possible before the time runs out.</p>
+      </div>
+    </div>
+    <div class="htp-step">
+      <div class="htp-num">5</div>
+      <div class="htp-text">
+        <strong>REACH YOUR GOAL</strong>
+        <p>If you set a balance goal, your progress is shown at all times. Hit 100% and you'll get a celebration. The GDP challenges are... ambitious.</p>
+      </div>
+    </div>
+    <div class="htp-tip">
+      <p>💡 <strong style="color:var(--gold)">Pro tip:</strong> Don't just hold the whole time. Wait for a dip, buy the bottom, sell the peak. Easy to say, hard to do.</p>
+    </div>
+    <button onclick="document.getElementById('howToPlay').style.display='none'"
+      style="font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:700;letter-spacing:.12em;
+      background:var(--gold);color:#000;border:none;padding:14px 32px;border-radius:3px;cursor:pointer;align-self:flex-start;">
+      GOT IT
     </button>
   </div>
 </div>
@@ -478,11 +565,18 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
     <button id="ov-btn" onclick="event.stopPropagation();startFromOverlay()">START ROUND 1</button>
     <button id="ov-play-btn" onclick="event.stopPropagation();quickPlay()" style="display:none">▶ JUST PLAY (no goal)</button>
     <div id="ov-click-hint">TAP ANYWHERE TO BEGIN</div>
-    <button onclick="event.stopPropagation();document.getElementById('terms').style.display='block'"
-      style="font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:#4a5a70;background:transparent;
-      border:none;cursor:pointer;letter-spacing:.08em;text-decoration:underline;touch-action:manipulation;">
-      Terms &amp; Conditions
-    </button>
+    <div style="display:flex;gap:16px;justify-content:center;">
+      <button onclick="event.stopPropagation();document.getElementById('howToPlay').style.display='block'"
+        style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#ccd6f0;background:transparent;
+        border:none;cursor:pointer;letter-spacing:.08em;text-decoration:underline;touch-action:manipulation;">
+        ❓ How to Play
+      </button>
+      <button onclick="event.stopPropagation();document.getElementById('terms').style.display='block'"
+        style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#4a5a70;background:transparent;
+        border:none;cursor:pointer;letter-spacing:.08em;text-decoration:underline;touch-action:manipulation;">
+        Terms &amp; Conditions
+      </button>
+    </div>
   </div>
 
   <!-- Challenges list (first round) — scrollable -->
@@ -581,84 +675,204 @@ const CHALLENGE_GROUPS = [
   {
     group: '🎯 Personal Goals',
     items: [
-          { name:'🪙 Millionaire',   goal:1000000,         balance:100,   label:'$1MM' },
-      { name:'🏦 Billionaire',   goal:1000000000,      balance:100,   label:'$1B' },
-      { name:'🚀 Moon Shot',     goal:1000000000,      balance:1,     label:'$1B from $1' },
-      { name:'💼 Hedge Fund',    goal:10000000000,     balance:10000, label:'$10B' },
-      { name:'🌍 Trillionaire',  goal:1000000000000,   balance:100,   label:'$1T' },
+      { name:'🪙 Millionaire',        goal:1e6,          balance:100,   label:'$1MM' },
+      { name:'🏦 Billionaire',        goal:1e9,          balance:100,   label:'$1B' },
+      { name:'🚀 Moon Shot',          goal:1e9,          balance:1,     label:'$1B' },
+      { name:'💼 Hedge Fund',         goal:1e10,         balance:10000, label:'$10B' },
+      { name:'🌍 Trillionaire',       goal:1e12,         balance:100,   label:'$1T' },
     ]
   },
   {
     group: '🌎 Americas',
     items: [
-      { name:'🇺🇸 United States', goal:29000000000000,  balance:100, label:'$29T' },
-      { name:'🇧🇷 Brazil',        goal:2100000000000,   balance:100, label:'$2.1T' },
-      { name:'🇨🇦 Canada',        goal:2100000000000,   balance:100, label:'$2.1T' },
-      { name:'🇲🇽 Mexico',        goal:1400000000000,   balance:100, label:'$1.4T' },
-      { name:'🇦🇷 Argentina',     goal:640000000000,    balance:100, label:'$640B' },
-      { name:'🇨🇴 Colombia',      goal:360000000000,    balance:100, label:'$360B' },
-      { name:'🇨🇱 Chile',         goal:340000000000,    balance:100, label:'$340B' },
-      { name:'🇵🇪 Peru',          goal:270000000000,    balance:100, label:'$270B' },
+      { name:'🇺🇸 United States',    goal:29e12,        balance:100, label:'$29T' },
+      { name:'🇧🇷 Brazil',           goal:2.1e12,       balance:100, label:'$2.1T' },
+      { name:'🇨🇦 Canada',           goal:2.1e12,       balance:100, label:'$2.1T' },
+      { name:'🇲🇽 Mexico',           goal:1.4e12,       balance:100, label:'$1.4T' },
+      { name:'🇦🇷 Argentina',        goal:640e9,        balance:100, label:'$640B' },
+      { name:'🇨🇴 Colombia',         goal:360e9,        balance:100, label:'$360B' },
+      { name:'🇨🇱 Chile',            goal:340e9,        balance:100, label:'$340B' },
+      { name:'🇵🇪 Peru',             goal:270e9,        balance:100, label:'$270B' },
+      { name:'🇪🇨 Ecuador',          goal:120e9,        balance:100, label:'$120B' },
+      { name:'🇩🇴 Dominican Rep.',   goal:120e9,        balance:100, label:'$120B' },
+      { name:'🇬🇹 Guatemala',        goal:95e9,         balance:100, label:'$95B' },
+      { name:'🇵🇦 Panama',           goal:77e9,         balance:100, label:'$77B' },
+      { name:'🇨🇷 Costa Rica',       goal:67e9,         balance:100, label:'$67B' },
+      { name:'🇧🇴 Bolivia',          goal:45e9,         balance:100, label:'$45B' },
+      { name:'🇵🇾 Paraguay',         goal:43e9,         balance:100, label:'$43B' },
+      { name:'🇺🇾 Uruguay',          goal:77e9,         balance:100, label:'$77B' },
+      { name:'🇻🇪 Venezuela',        goal:90e9,         balance:100, label:'$90B' },
+      { name:'🇹🇹 Trinidad & Tobago',goal:26e9,         balance:100, label:'$26B' },
+      { name:'🇯🇲 Jamaica',          goal:18e9,         balance:100, label:'$18B' },
+      { name:'🇭🇳 Honduras',         goal:34e9,         balance:100, label:'$34B' },
+      { name:'🇸🇻 El Salvador',      goal:34e9,         balance:100, label:'$34B' },
+      { name:'🇳🇮 Nicaragua',        goal:16e9,         balance:100, label:'$16B' },
+      { name:'🇭🇹 Haiti',            goal:20e9,         balance:100, label:'$20B' },
+      { name:'🇧🇸 Bahamas',          goal:13e9,         balance:100, label:'$13B' },
+      { name:'🇧🇧 Barbados',         goal:6e9,          balance:100, label:'$6B' },
+      { name:'🇬🇾 Guyana',           goal:26e9,         balance:100, label:'$26B' },
+      { name:'🇸🇷 Suriname',         goal:4e9,          balance:100, label:'$4B' },
+      { name:'🇧🇿 Belize',           goal:3e9,          balance:100, label:'$3B' },
+      { name:'🇨🇺 Cuba',             goal:107e9,        balance:100, label:'$107B' },
     ]
   },
   {
     group: '🌍 Europe',
     items: [
-      { name:'🇩🇪 Germany',       goal:4600000000000,   balance:100, label:'$4.6T' },
-      { name:'🇬🇧 UK',            goal:3300000000000,   balance:100, label:'$3.3T' },
-      { name:'🇫🇷 France',        goal:3100000000000,   balance:100, label:'$3.1T' },
-      { name:'🇮🇹 Italy',         goal:2200000000000,   balance:100, label:'$2.2T' },
-      { name:'🇷🇺 Russia',        goal:2000000000000,   balance:100, label:'$2T' },
-      { name:'🇪🇸 Spain',         goal:1600000000000,   balance:100, label:'$1.6T' },
-      { name:'🇳🇱 Netherlands',   goal:1100000000000,   balance:100, label:'$1.1T' },
-      { name:'🇨🇭 Switzerland',   goal:870000000000,    balance:100, label:'$870B' },
-      { name:'🇵🇱 Poland',        goal:880000000000,    balance:100, label:'$880B' },
-      { name:'🇸🇪 Sweden',        goal:590000000000,    balance:100, label:'$590B' },
-      { name:'🇧🇪 Belgium',       goal:630000000000,    balance:100, label:'$630B' },
-      { name:'🇳🇴 Norway',        goal:550000000000,    balance:100, label:'$550B' },
-      { name:'🇦🇹 Austria',       goal:520000000000,    balance:100, label:'$520B' },
-      { name:'🇩🇰 Denmark',       goal:420000000000,    balance:100, label:'$420B' },
-      { name:'🇫🇮 Finland',       goal:300000000000,    balance:100, label:'$300B' },
-      { name:'🇵🇹 Portugal',      goal:280000000000,    balance:100, label:'$280B' },
-      { name:'🇨🇿 Czech Rep.',    goal:330000000000,    balance:100, label:'$330B' },
-      { name:'🇷🇴 Romania',       goal:350000000000,    balance:100, label:'$350B' },
-      { name:'🇬🇷 Greece',        goal:240000000000,    balance:100, label:'$240B' },
-      { name:'🇭🇺 Hungary',       goal:210000000000,    balance:100, label:'$210B' },
-      { name:'🇺🇦 Ukraine',       goal:180000000000,    balance:100, label:'$180B' },
+      { name:'🇩🇪 Germany',          goal:4.6e12,       balance:100, label:'$4.6T' },
+      { name:'🇬🇧 UK',               goal:3.3e12,       balance:100, label:'$3.3T' },
+      { name:'🇫🇷 France',           goal:3.1e12,       balance:100, label:'$3.1T' },
+      { name:'🇮🇹 Italy',            goal:2.2e12,       balance:100, label:'$2.2T' },
+      { name:'🇷🇺 Russia',           goal:2e12,         balance:100, label:'$2T' },
+      { name:'🇪🇸 Spain',            goal:1.6e12,       balance:100, label:'$1.6T' },
+      { name:'🇳🇱 Netherlands',      goal:1.1e12,       balance:100, label:'$1.1T' },
+      { name:'🇨🇭 Switzerland',      goal:870e9,        balance:100, label:'$870B' },
+      { name:'🇵🇱 Poland',           goal:880e9,        balance:100, label:'$880B' },
+      { name:'🇸🇪 Sweden',           goal:590e9,        balance:100, label:'$590B' },
+      { name:'🇧🇪 Belgium',          goal:630e9,        balance:100, label:'$630B' },
+      { name:'🇳🇴 Norway',           goal:550e9,        balance:100, label:'$550B' },
+      { name:'🇦🇹 Austria',          goal:520e9,        balance:100, label:'$520B' },
+      { name:'🇩🇰 Denmark',          goal:420e9,        balance:100, label:'$420B' },
+      { name:'🇫🇮 Finland',          goal:300e9,        balance:100, label:'$300B' },
+      { name:'🇵🇹 Portugal',         goal:280e9,        balance:100, label:'$280B' },
+      { name:'🇨🇿 Czech Rep.',       goal:330e9,        balance:100, label:'$330B' },
+      { name:'🇷🇴 Romania',          goal:350e9,        balance:100, label:'$350B' },
+      { name:'🇬🇷 Greece',           goal:240e9,        balance:100, label:'$240B' },
+      { name:'🇭🇺 Hungary',          goal:210e9,        balance:100, label:'$210B' },
+      { name:'🇺🇦 Ukraine',          goal:180e9,        balance:100, label:'$180B' },
+      { name:'🇸🇰 Slovakia',         goal:130e9,        balance:100, label:'$130B' },
+      { name:'🇧🇬 Bulgaria',         goal:100e9,        balance:100, label:'$100B' },
+      { name:'🇭🇷 Croatia',          goal:82e9,         balance:100, label:'$82B' },
+      { name:'🇱🇹 Lithuania',        goal:80e9,         balance:100, label:'$80B' },
+      { name:'🇸🇮 Slovenia',         goal:68e9,         balance:100, label:'$68B' },
+      { name:'🇱🇺 Luxembourg',       goal:86e9,         balance:100, label:'$86B' },
+      { name:'🇷🇸 Serbia',           goal:75e9,         balance:100, label:'$75B' },
+      { name:'🇱🇻 Latvia',           goal:43e9,         balance:100, label:'$43B' },
+      { name:'🇪🇪 Estonia',          goal:38e9,         balance:100, label:'$38B' },
+      { name:'🇧🇾 Belarus',          goal:73e9,         balance:100, label:'$73B' },
+      { name:'🇮🇸 Iceland',          goal:27e9,         balance:100, label:'$27B' },
+      { name:'🇧🇦 Bosnia',           goal:27e9,         balance:100, label:'$27B' },
+      { name:'🇦🇱 Albania',          goal:22e9,         balance:100, label:'$22B' },
+      { name:'🇲🇰 North Macedonia',  goal:14e9,         balance:100, label:'$14B' },
+      { name:'🇲🇩 Moldova',          goal:15e9,         balance:100, label:'$15B' },
+      { name:'🇲🇪 Montenegro',       goal:7e9,          balance:100, label:'$7B' },
+      { name:'🇽🇰 Kosovo',           goal:10e9,         balance:100, label:'$10B' },
+      { name:'🇲🇹 Malta',            goal:20e9,         balance:100, label:'$20B' },
+      { name:'🇨🇾 Cyprus',           goal:28e9,         balance:100, label:'$28B' },
+      { name:'🇦🇩 Andorra',          goal:3.3e9,        balance:100, label:'$3.3B' },
+      { name:'🇲🇨 Monaco',           goal:8.8e9,        balance:100, label:'$8.8B' },
+      { name:'🇱🇮 Liechtenstein',    goal:7.8e9,        balance:100, label:'$7.8B' },
+      { name:'🇸🇲 San Marino',       goal:1.8e9,        balance:100, label:'$1.8B' },
     ]
   },
   {
     group: '🌏 Asia & Pacific',
     items: [
-      { name:'🇨🇳 China',         goal:18500000000000,  balance:100, label:'$18.5T' },
-      { name:'🇯🇵 Japan',         goal:4200000000000,   balance:100, label:'$4.2T' },
-      { name:'🇮🇳 India',         goal:3700000000000,   balance:100, label:'$3.7T' },
-      { name:'🇰🇷 South Korea',   goal:1700000000000,   balance:100, label:'$1.7T' },
-      { name:'🇦🇺 Australia',     goal:1700000000000,   balance:100, label:'$1.7T' },
-      { name:'🇮🇩 Indonesia',     goal:1400000000000,   balance:100, label:'$1.4T' },
-      { name:'🇸🇦 Saudi Arabia',  goal:1100000000000,   balance:100, label:'$1.1T' },
-      { name:'🇹🇷 Turkey',        goal:1100000000000,   balance:100, label:'$1.1T' },
-      { name:'🇹🇼 Taiwan',        goal:750000000000,    balance:100, label:'$750B' },
-      { name:'🇸🇬 Singapore',     goal:500000000000,    balance:100, label:'$500B' },
-      { name:'🇹🇭 Thailand',      goal:500000000000,    balance:100, label:'$500B' },
-      { name:'🇲🇾 Malaysia',      goal:430000000000,    balance:100, label:'$430B' },
-      { name:'🇵🇭 Philippines',   goal:430000000000,    balance:100, label:'$430B' },
-      { name:'🇻🇳 Vietnam',       goal:430000000000,    balance:100, label:'$430B' },
-      { name:'🇵🇰 Pakistan',      goal:340000000000,    balance:100, label:'$340B' },
-      { name:'🇳🇿 New Zealand',   goal:250000000000,    balance:100, label:'$250B' },
-      { name:'🇦🇪 UAE',           goal:500000000000,    balance:100, label:'$500B' },
-      { name:'🇮🇱 Israel',        goal:520000000000,    balance:100, label:'$520B' },
+      { name:'🇨🇳 China',            goal:18.5e12,      balance:100, label:'$18.5T' },
+      { name:'🇯🇵 Japan',            goal:4.2e12,       balance:100, label:'$4.2T' },
+      { name:'🇮🇳 India',            goal:3.7e12,       balance:100, label:'$3.7T' },
+      { name:'🇰🇷 South Korea',      goal:1.7e12,       balance:100, label:'$1.7T' },
+      { name:'🇦🇺 Australia',        goal:1.7e12,       balance:100, label:'$1.7T' },
+      { name:'🇮🇩 Indonesia',        goal:1.4e12,       balance:100, label:'$1.4T' },
+      { name:'🇸🇦 Saudi Arabia',     goal:1.1e12,       balance:100, label:'$1.1T' },
+      { name:'🇹🇷 Turkey',           goal:1.1e12,       balance:100, label:'$1.1T' },
+      { name:'🇹🇼 Taiwan',           goal:750e9,        balance:100, label:'$750B' },
+      { name:'🇸🇬 Singapore',        goal:500e9,        balance:100, label:'$500B' },
+      { name:'🇹🇭 Thailand',         goal:500e9,        balance:100, label:'$500B' },
+      { name:'🇲🇾 Malaysia',         goal:430e9,        balance:100, label:'$430B' },
+      { name:'🇵🇭 Philippines',      goal:430e9,        balance:100, label:'$430B' },
+      { name:'🇻🇳 Vietnam',          goal:430e9,        balance:100, label:'$430B' },
+      { name:'🇵🇰 Pakistan',         goal:340e9,        balance:100, label:'$340B' },
+      { name:'🇳🇿 New Zealand',      goal:250e9,        balance:100, label:'$250B' },
+      { name:'🇦🇪 UAE',              goal:500e9,        balance:100, label:'$500B' },
+      { name:'🇮🇱 Israel',           goal:520e9,        balance:100, label:'$520B' },
+      { name:'🇮🇷 Iran',             goal:400e9,        balance:100, label:'$400B' },
+      { name:'🇮🇶 Iraq',             goal:270e9,        balance:100, label:'$270B' },
+      { name:'🇰🇿 Kazakhstan',       goal:260e9,        balance:100, label:'$260B' },
+      { name:'🇧🇩 Bangladesh',       goal:460e9,        balance:100, label:'$460B' },
+      { name:'🇭🇰 Hong Kong',        goal:360e9,        balance:100, label:'$360B' },
+      { name:'🇲🇳 Mongolia',         goal:19e9,         balance:100, label:'$19B' },
+      { name:'🇰🇭 Cambodia',         goal:31e9,         balance:100, label:'$31B' },
+      { name:'🇱🇰 Sri Lanka',        goal:84e9,         balance:100, label:'$84B' },
+      { name:'🇲🇲 Myanmar',          goal:65e9,         balance:100, label:'$65B' },
+      { name:'🇳🇵 Nepal',            goal:40e9,         balance:100, label:'$40B' },
+      { name:'🇦🇫 Afghanistan',      goal:20e9,         balance:100, label:'$20B' },
+      { name:'🇺🇿 Uzbekistan',       goal:90e9,         balance:100, label:'$90B' },
+      { name:'🇦🇿 Azerbaijan',       goal:78e9,         balance:100, label:'$78B' },
+      { name:'🇬🇪 Georgia',          goal:28e9,         balance:100, label:'$28B' },
+      { name:'🇦🇲 Armenia',          goal:24e9,         balance:100, label:'$24B' },
+      { name:'🇯🇴 Jordan',           goal:50e9,         balance:100, label:'$50B' },
+      { name:'🇱🇧 Lebanon',          goal:22e9,         balance:100, label:'$22B' },
+      { name:'🇴🇲 Oman',             goal:105e9,        balance:100, label:'$105B' },
+      { name:'🇰🇼 Kuwait',           goal:160e9,        balance:100, label:'$160B' },
+      { name:'🇶🇦 Qatar',            goal:220e9,        balance:100, label:'$220B' },
+      { name:'🇧🇭 Bahrain',          goal:44e9,         balance:100, label:'$44B' },
+      { name:'🇾🇪 Yemen',            goal:22e9,         balance:100, label:'$22B' },
+      { name:'🇵🇬 Papua New Guinea', goal:30e9,         balance:100, label:'$30B' },
+      { name:'🇫🇯 Fiji',             goal:5e9,          balance:100, label:'$5B' },
+      { name:'🇹🇲 Turkmenistan',     goal:60e9,         balance:100, label:'$60B' },
+      { name:'🇹🇯 Tajikistan',       goal:12e9,         balance:100, label:'$12B' },
+      { name:'🇰🇬 Kyrgyzstan',       goal:11e9,         balance:100, label:'$11B' },
+      { name:'🇲🇻 Maldives',         goal:7e9,          balance:100, label:'$7B' },
+      { name:'🇧🇹 Bhutan',           goal:3e9,          balance:100, label:'$3B' },
+      { name:'🇹🇱 Timor-Leste',      goal:3e9,          balance:100, label:'$3B' },
     ]
   },
   {
     group: '🌍 Africa',
     items: [
-      { name:'🇳🇬 Nigeria',       goal:390000000000,    balance:100, label:'$390B' },
-      { name:'🇿🇦 South Africa',  goal:380000000000,    balance:100, label:'$380B' },
-      { name:'🇪🇬 Egypt',         goal:390000000000,    balance:100, label:'$390B' },
-      { name:'🇪🇹 Ethiopia',      goal:160000000000,    balance:100, label:'$160B' },
-      { name:'🇰🇪 Kenya',         goal:110000000000,    balance:100, label:'$110B' },
-      { name:'🇬🇭 Ghana',         goal:76000000000,     balance:100, label:'$76B' },
+      { name:'🇳🇬 Nigeria',          goal:390e9,        balance:100, label:'$390B' },
+      { name:'🇿🇦 South Africa',     goal:380e9,        balance:100, label:'$380B' },
+      { name:'🇪🇬 Egypt',            goal:390e9,        balance:100, label:'$390B' },
+      { name:'🇩🇿 Algeria',          goal:240e9,        balance:100, label:'$240B' },
+      { name:'🇲🇦 Morocco',          goal:150e9,        balance:100, label:'$150B' },
+      { name:'🇪🇹 Ethiopia',         goal:160e9,        balance:100, label:'$160B' },
+      { name:'🇹🇿 Tanzania',         goal:85e9,         balance:100, label:'$85B' },
+      { name:'🇰🇪 Kenya',            goal:110e9,        balance:100, label:'$110B' },
+      { name:'🇬🇭 Ghana',            goal:76e9,         balance:100, label:'$76B' },
+      { name:'🇦🇴 Angola',           goal:124e9,        balance:100, label:'$124B' },
+      { name:'🇨🇮 Ivory Coast',      goal:78e9,         balance:100, label:'$78B' },
+      { name:'🇺🇬 Uganda',           goal:49e9,         balance:100, label:'$49B' },
+      { name:'🇸🇩 Sudan',            goal:170e9,        balance:100, label:'$170B' },
+      { name:'🇹🇳 Tunisia',          goal:48e9,         balance:100, label:'$48B' },
+      { name:'🇨🇲 Cameroon',         goal:47e9,         balance:100, label:'$47B' },
+      { name:'🇿🇲 Zambia',           goal:29e9,         balance:100, label:'$29B' },
+      { name:'🇸🇳 Senegal',          goal:31e9,         balance:100, label:'$31B' },
+      { name:'🇿🇼 Zimbabwe',         goal:26e9,         balance:100, label:'$26B' },
+      { name:'🇲🇿 Mozambique',       goal:18e9,         balance:100, label:'$18B' },
+      { name:'🇲🇬 Madagascar',       goal:16e9,         balance:100, label:'$16B' },
+      { name:'🇧🇫 Burkina Faso',     goal:20e9,         balance:100, label:'$20B' },
+      { name:'🇲🇱 Mali',             goal:20e9,         balance:100, label:'$20B' },
+      { name:'🇲🇼 Malawi',           goal:12e9,         balance:100, label:'$12B' },
+      { name:'🇳🇪 Niger',            goal:17e9,         balance:100, label:'$17B' },
+      { name:'🇷🇼 Rwanda',           goal:14e9,         balance:100, label:'$14B' },
+      { name:'🇨🇩 DR Congo',         goal:65e9,         balance:100, label:'$65B' },
+      { name:'🇱🇾 Libya',            goal:40e9,         balance:100, label:'$40B' },
+      { name:'🇬🇳 Guinea',           goal:22e9,         balance:100, label:'$22B' },
+      { name:'🇧🇯 Benin',            goal:19e9,         balance:100, label:'$19B' },
+      { name:'🇸🇴 Somalia',          goal:8e9,          balance:100, label:'$8B' },
+      { name:'🇹🇬 Togo',             goal:9e9,          balance:100, label:'$9B' },
+      { name:'🇸🇱 Sierra Leone',     goal:4e9,          balance:100, label:'$4B' },
+      { name:'🇱🇷 Liberia',          goal:4e9,          balance:100, label:'$4B' },
+      { name:'🇧🇼 Botswana',         goal:20e9,         balance:100, label:'$20B' },
+      { name:'🇳🇦 Namibia',          goal:13e9,         balance:100, label:'$13B' },
+      { name:'🇲🇺 Mauritius',        goal:14e9,         balance:100, label:'$14B' },
+      { name:'🇬🇦 Gabon',            goal:20e9,         balance:100, label:'$20B' },
+      { name:'🇹🇩 Chad',             goal:12e9,         balance:100, label:'$12B' },
+      { name:'🇪🇷 Eritrea',          goal:2e9,          balance:100, label:'$2B' },
+      { name:'🇩🇯 Djibouti',         goal:4e9,          balance:100, label:'$4B' },
+      { name:'🇨🇫 C. African Rep.',  goal:3e9,          balance:100, label:'$3B' },
+      { name:'🇬🇶 Eq. Guinea',       goal:12e9,         balance:100, label:'$12B' },
+      { name:'🇸🇿 Eswatini',         goal:4.5e9,        balance:100, label:'$4.5B' },
+      { name:'🇱🇸 Lesotho',          goal:2.5e9,        balance:100, label:'$2.5B' },
+      { name:'🇰🇲 Comoros',          goal:1.3e9,        balance:100, label:'$1.3B' },
+      { name:'🇨🇻 Cape Verde',       goal:2.4e9,        balance:100, label:'$2.4B' },
+      { name:'🇸🇹 São Tomé',         goal:0.6e9,        balance:100, label:'$600MM' },
+      { name:'🇸🇨 Seychelles',       goal:2e9,          balance:100, label:'$2B' },
+      { name:'🇬🇲 Gambia',           goal:2e9,          balance:100, label:'$2B' },
+      { name:'🇬🇼 Guinea-Bissau',    goal:2e9,          balance:100, label:'$2B' },
+      { name:'🇧🇮 Burundi',          goal:3e9,          balance:100, label:'$3B' },
+      { name:'🇨🇬 Rep. of Congo',    goal:14e9,         balance:100, label:'$14B' },
     ]
   },
 ];
