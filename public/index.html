@@ -72,6 +72,7 @@ html,body{
 }
 /* Desktop: single row */
 .hud-row{ display:flex;overflow-x:auto;scrollbar-width:none; }
+@media(min-width:701px){ #hud-row1{ display:flex; } }
 .hud-row::-webkit-scrollbar{display:none;}
 /* Hide second row on desktop */
 #hud-row2{ display:none; }
@@ -94,6 +95,16 @@ html,body{
 }
 .hud-val.green{color:var(--green);}
 .hud-val.red{color:var(--red);}
+@media(min-width:701px){
+  #hud-balance-right{
+    border-left:2px solid var(--gold);
+    background:rgba(255,196,0,.06);
+    padding:5px 18px;
+    margin-left:auto;
+  }
+  #hud-balance-right .hud-lbl{color:var(--gold);letter-spacing:.14em;}
+  #hud-balance-right .hud-val{font-size:1.1rem;color:var(--gold);}
+}
 
 /* ── CHARTS AREA: fills remaining space ── */
 #chartsArea{
@@ -334,7 +345,6 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
   <!-- HUD: one row desktop / two rows mobile -->
   <div id="hud">
     <div class="hud-row" id="hud-row1">
-      <div class="hud-cell"><span class="hud-lbl">Balance</span><span class="hud-val" id="hBalance">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Bal. Short</span><span class="hud-val" id="hBalanceShort">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Round P&amp;L</span><span class="hud-val" id="hRoundPnl">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Session P&amp;L</span><span class="hud-val" id="hPnl">—</span></div>
@@ -343,6 +353,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
       <div class="hud-cell" id="hud-time-desktop"><span class="hud-lbl">Time</span><span class="hud-val" id="hSessionTime">00:00</span></div>
       <div class="hud-cell" id="hud-round-desktop"><span class="hud-lbl">Round</span><span class="hud-val" id="hRound">—</span></div>
       <div class="hud-cell" id="hud-stock-desktop"><span class="hud-lbl">Stock</span><span class="hud-val" id="hStock" style="color:var(--gold)">—</span></div>
+      <div class="hud-cell" id="hud-balance-right"><span class="hud-lbl">Balance</span><span class="hud-val" id="hBalance">—</span></div>
     </div>
     <div class="hud-row" id="hud-row2">
       <div class="hud-cell"><span class="hud-lbl">Open P&amp;L</span><span class="hud-val" id="hOpenMob">—</span></div>
