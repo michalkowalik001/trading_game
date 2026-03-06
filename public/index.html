@@ -1116,8 +1116,10 @@ async function loadStocks(){
     loadingText.textContent='FETCHING STOCK LIST...';
     const listRes=await fetch('/stocks/index.json');
     if(!listRes.ok) throw new Error('Could not load /stocks/index.json (HTTP '+listRes.status+')');
-    const stocks=await listRes.json();
-    if(!Array.isArray(stocks)||stocks.length===0) throw new Error('index.json is empty');
+    const stocksRaw=await listRes.json();
+    if(!Array.isArray(stocksRaw)||stocksRaw.length===0) throw new Error('index.json is empty');
+    // Shuffle so eager-loaded stocks are random, not always A-Z
+    const stocks=stocksRaw.slice().sort(()=>Math.random()-.5);
 
     // ── PHASE 1: load first 5 stocks before showing UI ──
     const EAGER=Math.min(5,stocks.length);
