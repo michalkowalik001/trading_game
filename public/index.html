@@ -146,6 +146,21 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
   font-size:.7rem;font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.45);
   pointer-events:none;z-index:10;white-space:nowrap;
 }
+#stockDesc{
+  position:absolute;top:8px;right:48px;
+  font-size:.58rem;color:rgba(255,255,255,.35);letter-spacing:.04em;
+  pointer-events:none;z-index:10;max-width:220px;text-align:right;line-height:1.5;
+  font-family:'IBM Plex Mono',monospace;
+}
+@media(max-width:700px){#stockDesc{display:none;}}
+#stockDesc{
+  position:absolute;top:10px;right:48px;
+  font-size:.6rem;color:rgba(255,255,255,.35);letter-spacing:.04em;
+  max-width:220px;text-align:right;line-height:1.5;
+  pointer-events:none;z-index:10;
+  font-family:'IBM Plex Mono',monospace;
+}
+@media(max-width:700px){#stockDesc{display:none;}}
 
 /* ── PAUSE OVERLAY ── */
 #pauseScreen{
@@ -265,7 +280,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 
 /* GOAL TOAST */
 #goalToast{
-  position:fixed;top:60px;left:50%;transform:translateX(-50%);
+  position:fixed;top:var(--hud-bottom,80px);left:50%;transform:translateX(-50%);
   z-index:150;background:var(--gold);color:#000;
   font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:1rem;
   letter-spacing:.15em;padding:12px 28px;border-radius:4px;
@@ -371,6 +386,8 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
       <div id="tradeFlash"></div>
       <div id="holdingBar">● LONG POSITION OPEN</div>
       <div id="hint">HOLD TO BUY · RELEASE TO SELL</div>
+      <div id="stockDesc"></div>
+      <div id="stockDesc"></div>
     </div>
     <div id="equityWrap">
       <canvas id="equityChart"></canvas>
@@ -497,6 +514,9 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
       The game is provided "as is" without warranty of any kind. We do not guarantee uninterrupted availability or accuracy of historical data displayed.
     </div>
 
+    <div style="font-size:.72rem;color:#6a7a90;line-height:1.8;letter-spacing:.04em;border-top:1px solid var(--border);padding-top:14px;">
+      By playing The Market Game, you acknowledge that you have read, understood, and agree to be bound by these Terms &amp; Conditions.
+    </div>
     <button onclick="document.getElementById('terms').style.display='none'"
       style="font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:700;letter-spacing:.12em;
       background:var(--gold);color:#000;border:none;padding:14px 32px;border-radius:3px;cursor:pointer;align-self:flex-start;margin-top:8px;">
@@ -545,14 +565,14 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
     <button id="ov-btn" onclick="event.stopPropagation();startFromOverlay()">START ROUND 1</button>
     <button id="ov-play-btn" onclick="event.stopPropagation();quickPlay()" style="display:none">▶ JUST PLAY (no goal)</button>
     <div id="ov-click-hint">TAP ANYWHERE TO BEGIN</div>
-    <div style="display:flex;gap:16px;justify-content:center;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
       <button onclick="event.stopPropagation();document.getElementById('howToPlay').style.display='block'"
-        style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#ccd6f0;background:transparent;
+        style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:#aabbcc;background:transparent;
         border:none;cursor:pointer;letter-spacing:.08em;text-decoration:underline;touch-action:manipulation;">
         ❓ How to Play
       </button>
       <button onclick="event.stopPropagation();document.getElementById('terms').style.display='block'"
-        style="font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:#4a5a70;background:transparent;
+        style="font-family:'IBM Plex Mono',monospace;font-size:.55rem;color:#4a5a70;background:transparent;
         border:none;cursor:pointer;letter-spacing:.08em;text-decoration:underline;touch-action:manipulation;">
         Terms &amp; Conditions
       </button>
@@ -957,9 +977,20 @@ const fmt = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits
 const fmtFull = n => { const sign=n<0?'-':''; return sign+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
 function fmtS(n){
   const a=Math.abs(n);
-  // If value has 2+ digits before decimal, show 0 decimals; else 1 decimal
-  const decimals=a>=10?0:1;
+  var decimals;
+  if(a>=10) decimals=0;
+  else if(a>=1) decimals=1;
+  else if(a>=0.01) decimals=4;
+  else decimals=6;
   return '$'+a.toLocaleString('en-US',{minimumFractionDigits:decimals,maximumFractionDigits:decimals});
+}
+function signedShort(n){
+  var sign=n>=0?'+':'-'; var a=Math.abs(n);
+  if(a>=1e15) return sign+'$'+(a/1e15).toFixed(2)+'Q';
+  if(a>=1e12) return sign+'$'+(a/1e12).toFixed(2)+'T';
+  if(a>=1e9)  return sign+'$'+(a/1e9).toFixed(2)+'B';
+  if(a>=1e6)  return sign+'$'+(a/1e6).toFixed(2)+'M';
+  return (n>=0?'+':'-')+'$'+a.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 const signed = n => (n>=0?'+':'-') + fmt(n);
 const signedPct = n => (n>=0?'+':'') + n.toFixed(2) + '%';
@@ -1116,27 +1147,43 @@ async function loadStocks(){
     loadingText.textContent='FETCHING STOCK LIST...';
     const listRes=await fetch('/stocks/index.json');
     if(!listRes.ok) throw new Error('Could not load /stocks/index.json (HTTP '+listRes.status+')');
+    // Load stock descriptions (optional — don't fail if missing)
+    let STOCK_DESCS={};
+    try{
+      const dRes=await fetch('/stocks/descriptions.json');
+      if(dRes.ok) STOCK_DESCS=await dRes.json();
+    }catch(e){ console.warn('No descriptions.json'); }
+    window.STOCK_DESCS=STOCK_DESCS;
+
     const stocksRaw=await listRes.json();
     if(!Array.isArray(stocksRaw)||stocksRaw.length===0) throw new Error('index.json is empty');
     // Shuffle so eager-loaded stocks are random, not always A-Z
     const stocks=stocksRaw.slice().sort(()=>Math.random()-.5);
 
-    // ── PHASE 1: load first 5 stocks before showing UI ──
-    const EAGER=Math.min(5,stocks.length);
-    for(let i=0;i<EAGER;i++){
-      loadingText.textContent='LOADING '+stocks[i]+'... ('+(i+1)+'/'+EAGER+')';
-      loadingFill.style.width=((i+1)/EAGER*100)+'%';
-      await fetchStock(stocks[i],i);
+    // ── PHASE 1: load 30 stocks in parallel batches before showing UI ──
+    // This gives real variety from round 1 without waiting for all 200+
+    const EAGER=Math.min(30,stocks.length);
+    const BATCH=5; // load 5 at a time in parallel
+    for(let i=0;i<EAGER;i+=BATCH){
+      const batch=stocks.slice(i,Math.min(i+BATCH,EAGER));
+      await Promise.all(batch.map((sym,j)=>fetchStock(sym,i+j)));
+      loadingFill.style.width=(Math.min(i+BATCH,EAGER)/EAGER*100)+'%';
+      loadingText.textContent='LOADING STOCKS... ('+Math.min(i+BATCH,EAGER)+'/'+EAGER+')';
     }
     if(STOCK_POOL.length===0) throw new Error('All initial CSVs failed');
+    // Load stock descriptions (optional — don't fail if missing)
+    try{
+      const dr=await fetch('/stocks/descriptions.json');
+      if(dr.ok) window.STOCK_DESCS=await dr.json();
+    }catch(e){ window.STOCK_DESCS={}; }
     loadingEl.classList.add('hide');
     init();
 
     // ── PHASE 2: load remaining stocks quietly in background ──
-    for(let i=EAGER;i<stocks.length;i++){
-      await fetchStock(stocks[i],i);
-      // small yield so it doesn't block the game
-      await new Promise(r=>setTimeout(r,50));
+    for(let i=EAGER;i<stocks.length;i+=BATCH){
+      const batch=stocks.slice(i,Math.min(i+BATCH,stocks.length));
+      await Promise.all(batch.map((sym,j)=>fetchStock(sym,i+j)));
+      await new Promise(r=>setTimeout(r,100));
     }
   }catch(e){
     loadingText.textContent='ERROR';
@@ -1412,11 +1459,11 @@ function updateHUD(){
 
   const roundPnL=+(balance-balanceAtRoundStart).toFixed(2);
   const rpEl=document.getElementById('hRoundPnl');
-  rpEl.textContent=roundPnL!==0?signed(roundPnL):'—';
+  rpEl.textContent=roundPnL!==0?signedShort(roundPnL):'—';
   rpEl.className='hud-val '+(roundPnL>0?'green':roundPnL<0?'red':'');
 
   const pnlEl=document.getElementById('hPnl');
-  pnlEl.textContent=totalPnL!==0?signed(totalPnL):'—';
+  pnlEl.textContent=totalPnL!==0?signedShort(totalPnL):'—';
   pnlEl.className='hud-val '+(totalPnL>0?'green':totalPnL<0?'red':'');
 
   const gEl=document.getElementById('hGoalPct');
@@ -1430,7 +1477,7 @@ function updateHUD(){
   const oEl=document.getElementById('hOpen');
   if(holding&&entryPrice&&cur){
     const u=(cur-entryPrice)*(balance/entryPrice);
-    oEl.textContent=signed(u);
+    oEl.textContent=signedShort(u);
     oEl.className='hud-val '+(u>=0?'green':'red');
   }else{ oEl.textContent='—'; oEl.className='hud-val'; }
 
@@ -1980,6 +2027,15 @@ function startRound(){
   roundNum++; running=true; paused=false;
   roundStart=Date.now();
   updateHUD(); tick();
+  // Position goal toast just below the HUD
+  requestAnimationFrame(function(){
+    var hud=document.getElementById('hud');
+    var topbar=document.getElementById('topbar');
+    if(hud&&topbar){
+      var bottom=(topbar.offsetHeight||40)+(hud.offsetHeight||60);
+      document.documentElement.style.setProperty('--hud-bottom', bottom+'px');
+    }
+  });
 }
 
 function endRound(){
