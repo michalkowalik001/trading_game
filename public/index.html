@@ -361,7 +361,6 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
   <!-- HUD: one row desktop / two rows mobile -->
   <div id="hud">
     <div class="hud-row" id="hud-row1">
-      <div class="hud-cell"><span class="hud-lbl">Bal. Short</span><span class="hud-val" id="hBalanceShort">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Round P&amp;L</span><span class="hud-val" id="hRoundPnl">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Session P&amp;L</span><span class="hud-val" id="hPnl">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Goal Progress</span><span class="hud-val" id="hGoalPct">—</span></div>
@@ -1836,7 +1835,7 @@ function updateHUD(){
   const prev=revealed>1?PRICES[revealed-2]:null;
 
   document.getElementById('hBalance').textContent=fmtFull(balance);
-  document.getElementById('hBalanceShort').textContent=fmtShort(balance);
+
   document.getElementById('hRound').textContent=roundNum;
   document.getElementById('hStock').textContent=stockName(currentSym);
   // Mirror to mobile row 2
