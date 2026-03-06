@@ -2417,17 +2417,13 @@ function startRound(){
     sessionTimerHandle=setInterval(updateSessionTimer,1000);
   }
   roundNum++; running=true; paused=false;
-  roundStart=Date.now();
-  updateHUD(); tick();
-  // Position goal toast just below the HUD
-  requestAnimationFrame(function(){
-    var hud=document.getElementById('hud');
-    var topbar=document.getElementById('topbar');
-    if(hud&&topbar){
-      var bottom=(topbar.offsetHeight||40)+(hud.offsetHeight||60);
-      document.documentElement.style.setProperty('--hud-bottom', bottom+'px');
-    }
-  });
+  // Pre-reveal 15 bars instantly so chart is never blank at round start
+  const PRE=15;
+  revealed=PRE;
+  for(var i=0;i<PRE;i++) equityCurve.push(balance);
+  roundStart=Date.now()-(PRE*TICK_MS);
+  updateHUD(); drawMain(); drawEquity();
+  tick();
 }
 
 function endRound(){
