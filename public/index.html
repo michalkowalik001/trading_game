@@ -1005,77 +1005,91 @@ function unFmtInput(el){
 function parseYahooCSV(text) {
   const allLines=text.trim().split('\n').map(l=>l.trim()).filter(Boolean);
   if(allLines.length<2) throw new Error('CSV too short');
+
+  // Auto-detect separator: tab or comma
   const sep=allLines[0].includes('\t')?'\t':',';
 
   function splitRow(l){ return l.split(sep).map(function(c){return c.trim().replace(/^"|"$/g,'');}); }
+
   function normalizeDate(s){
-    s=(s||'').trim().replace(/"/g,''); if(!s) return null;
+    s=(s||'').trim().replace(/"/g,'');
+    if(!s) return null;
+    // Format: YYYY-MM-DD
     if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+    // Format: M/D/YY or M/D/YYYY (Yahoo US format)
     if(/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)){
       var p=s.split('/');
-      var yr=p[2].length===2?(parseInt(p[2])>30?'19'+p[2]:'20'+p[2]):p[2];
+      var yr=p[2].length===2?(parseInt(p[2])>=25?'19'+p[2]:'20'+p[2]):p[2];
       return yr+'-'+p[0].padStart(2,'0')+'-'+p[1].padStart(2,'0');
     }
+    // Format: D/M/YYYY (European) — heuristic: if month>12 it must be day-first
+    // We rely on M/D above since Yahoo Finance always uses M/D
     return null;
   }
 
-  // ── Find the header row and first data row ──
-  // Yahoo Finance CSVs can have:
-  //   Format A: row0=headers (Date,Adj Close,...), row1=data
-  //   Format B: row0=headers (Date,Adj Close,...), row1=ticker row (ZM,ZM,...), row2=data
-  //   Format C: row0=metadata (Ticker,WFC), row1=headers, row2=data
+  // ── Find header row and first data row ──
+  // Handles multiple Yahoo formats:
+  //   A: Date,Open,High,Low,Close,Adj Close,Volume  (classic)
+  //   B: Price,Close,High,Low,Open,Volume + ticker meta rows (new Yahoo)
+  //   C: Ticker,ZM row at top then header
+  //   D: Date row + ticker/label row before data
 
   var headerIdx=-1, dataStartIdx=-1;
-  for(var i=0;i<Math.min(allLines.length,10);i++){
-    var cols=splitRow(allLines[i]).map(function(c){return c.toLowerCase();});
-    // This row is a header if it contains "date" or "price" as the first column
-    if(cols[0]==='date'||cols[0]==='price'){
+  for(var i=0;i<Math.min(allLines.length,15);i++){
+    var cols=splitRow(allLines[i]).map(function(c){return c.toLowerCase().trim();});
+    var first=cols[0];
+    // A header row starts with 'date' or 'price'
+    if(first==='date'||first==='price'){
       headerIdx=i;
-      // Now find the first data row after the header (skip any ticker/label rows)
-      for(var j=i+1;j<Math.min(allLines.length,i+5);j++){
-        if(normalizeDate(splitRow(allLines[j])[0])){
-          dataStartIdx=j; break;
-        }
+      // Skip any non-date rows after the header (ticker rows, label rows)
+      for(var j=i+1;j<Math.min(allLines.length,i+10);j++){
+        var candidate=splitRow(allLines[j])[0];
+        if(normalizeDate(candidate)){ dataStartIdx=j; break; }
       }
       break;
     }
   }
+
   if(headerIdx===-1) headerIdx=0;
   if(dataStartIdx===-1){
-    // fallback: find first row after header that looks like a date
     for(var k=headerIdx+1;k<allLines.length;k++){
       if(normalizeDate(splitRow(allLines[k])[0])){ dataStartIdx=k; break; }
     }
   }
   if(dataStartIdx===-1) dataStartIdx=headerIdx+1;
 
-  var rawHeaders=splitRow(allLines[headerIdx]).map(function(h){return h.toLowerCase();});
+  var rawHeaders=splitRow(allLines[headerIdx]).map(function(h){return h.toLowerCase().trim();});
+
+  // Find date column (col 0 is 'date' or 'price')
   var dateIdx=rawHeaders.indexOf('date');
   if(dateIdx===-1) dateIdx=rawHeaders.indexOf('price');
   if(dateIdx===-1) dateIdx=0;
 
+  // Find close price column — prefer 'adj close', fall back to 'close'
   var closeIdx=rawHeaders.indexOf('adj close');
   if(closeIdx===-1) closeIdx=rawHeaders.indexOf('adjclose');
   if(closeIdx===-1) closeIdx=rawHeaders.indexOf('close');
   if(closeIdx===-1){
-    for(var k=0;k<rawHeaders.length;k++){
-      if(rawHeaders[k].indexOf('close')!==-1){closeIdx=k;break;}
+    for(var ci=0;ci<rawHeaders.length;ci++){
+      if(rawHeaders[ci].indexOf('close')!==-1){ closeIdx=ci; break; }
     }
   }
-  if(closeIdx===-1) throw new Error('No Close column. Headers: '+rawHeaders.join(', '));
+  if(closeIdx===-1) throw new Error('No Close column found. Headers: '+rawHeaders.join('|'));
 
   var prices=[],dates=[];
   for(var r=dataStartIdx;r<allLines.length;r++){
     var row=splitRow(allLines[r]);
     if(row.length<=Math.max(dateIdx,closeIdx)) continue;
-    var dateStr=normalizeDate(row[dateIdx]); if(!dateStr) continue;
-    var raw=(row[closeIdx]||'').toLowerCase();
-    if(raw===''||raw==='null'||raw==='n/a'||raw==='-') continue;
+    var dateStr=normalizeDate(row[dateIdx]);
+    if(!dateStr) continue;
+    var raw=(row[closeIdx]||'').toLowerCase().trim();
+    if(!raw||raw==='null'||raw==='n/a'||raw==='-'||raw==='nan') continue;
     var price=parseFloat(raw);
     if(isNaN(price)||price<=0) continue;
-    dates.push(dateStr); prices.push(Math.round(price*100)/100);
+    dates.push(dateStr);
+    prices.push(Math.round(price*10000)/10000); // keep 4 decimals for FX/crypto
   }
-  if(prices.length<10) throw new Error('Only '+prices.length+' valid rows. Header idx='+headerIdx+' cols: '+rawHeaders.join(', '));
+  if(prices.length<10) throw new Error('Only '+prices.length+' valid rows parsed. headerIdx='+headerIdx+' dataStart='+dataStartIdx+' cols='+rawHeaders.join('|'));
   return{prices,dates};
 }
 
@@ -1939,12 +1953,12 @@ function buildChallenges(){
 // ─── ROUND FLOW ───────────────────────────────────────────────────────────────
 function pickNextStock(){
   // Exclude recently played stocks (up to last 5, or half the pool if smaller)
-  const excludeN=Math.min(5, Math.floor(SYMS.length/2));
+  const excludeN=Math.min(15, Math.floor(SYMS.length/2));
   let pool=SYMS.filter(s=>!recentStocks.slice(-excludeN).includes(s));
   if(pool.length===0) pool=SYMS; // fallback if pool too small
   const chosen=pool[Math.floor(Math.random()*pool.length)];
   recentStocks.push(chosen);
-  if(recentStocks.length>10) recentStocks.shift(); // keep list bounded
+  if(recentStocks.length>20) recentStocks.shift(); // keep list bounded
   const sd=STOCK_POOL.find(s=>s.sym===chosen);
   currentSym=chosen;
   const maxStart=sd.prices.length-TOTAL;
