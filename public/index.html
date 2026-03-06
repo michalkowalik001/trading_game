@@ -153,13 +153,6 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
   pointer-events:none;z-index:10;white-space:nowrap;
 }
 #stockDesc{
-  position:absolute;top:8px;right:48px;
-  font-size:.58rem;color:rgba(255,255,255,.35);letter-spacing:.04em;
-  pointer-events:none;z-index:10;max-width:220px;text-align:right;line-height:1.5;
-  font-family:'IBM Plex Mono',monospace;
-}
-@media(max-width:700px){#stockDesc{display:none;}}
-#stockDesc{
   position:absolute;top:10px;right:48px;
   font-size:.6rem;color:rgba(255,255,255,.35);letter-spacing:.04em;
   max-width:220px;text-align:right;line-height:1.5;
@@ -392,7 +385,6 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
       <div id="tradeFlash"></div>
       <div id="holdingBar">● LONG POSITION OPEN</div>
       <div id="hint">HOLD TO BUY · RELEASE TO SELL</div>
-      <div id="stockDesc"></div>
       <div id="stockDesc"></div>
     </div>
     <div id="equityWrap">
@@ -1161,22 +1153,20 @@ async function loadStocks(){
     loadingText.textContent='FETCHING STOCK LIST...';
     const listRes=await fetch('/stocks/index.json');
     if(!listRes.ok) throw new Error('Could not load /stocks/index.json (HTTP '+listRes.status+')');
-    // Load stock descriptions (optional — don't fail if missing)
-    let STOCK_DESCS={};
-    try{
-      const dRes=await fetch('/stocks/descriptions.json');
-      if(dRes.ok) STOCK_DESCS=await dRes.json();
-    }catch(e){ console.warn('No descriptions.json'); }
-    window.STOCK_DESCS=STOCK_DESCS;
-
     const stocksRaw=await listRes.json();
+    // Load descriptions before game starts
+    window.STOCK_DESCS={};
+    try{
+      const dr=await fetch('/stocks/descriptions.json');
+      if(dr.ok) window.STOCK_DESCS=await dr.json();
+    }catch(e){}
     if(!Array.isArray(stocksRaw)||stocksRaw.length===0) throw new Error('index.json is empty');
     // Shuffle so eager-loaded stocks are random, not always A-Z
     const stocks=stocksRaw.slice().sort(()=>Math.random()-.5);
 
     // ── PHASE 1: load 30 stocks in parallel batches before showing UI ──
     // This gives real variety from round 1 without waiting for all 200+
-    const EAGER=Math.min(30,stocks.length);
+    const EAGER=Math.min(3,stocks.length);
     const BATCH=5; // load 5 at a time in parallel
     for(let i=0;i<EAGER;i+=BATCH){
       const batch=stocks.slice(i,Math.min(i+BATCH,EAGER));
@@ -1461,6 +1451,8 @@ function updateHUD(){
     if(ms&&ds){ms.textContent=ds.textContent;ms.className=ds.className;}
   });
   document.getElementById('stockTag').textContent=currentSym;
+  var _de=document.getElementById('stockDesc');
+  if(_de) _de.textContent=(window.STOCK_DESCS&&window.STOCK_DESCS[currentSym])||'';
   if(cur){
     document.getElementById('livePrice').textContent=fmt(cur);
     if(prev){
