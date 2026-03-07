@@ -2358,6 +2358,7 @@ function showOverlay(isFirst,roundPnL){
     document.getElementById('ov-round').textContent=roundNum+1;
     document.getElementById('ov-btn').textContent='NEXT ROUND →';
   }
+  overlay.style.display='';
   overlay.classList.add('show');
 }
 
@@ -2502,10 +2503,11 @@ function init(){
   resizeAll();
   if(RETURNING_FROM_STRIPE){
     RETURNING_FROM_STRIPE = false;
-    document.getElementById('overlay').style.display='none';
+    overlay.classList.remove('show');
+    overlay.style.display='';
     hidePaywall();
-    // STOCK_POOL is already loaded (init() is called after eager stocks load)
-    // so pickNextStock and startRound are safe to call immediately
+    totalPauseMs=0;
+    pauseStart=null;
     pickNextStock();
     startRound();
   } else {
