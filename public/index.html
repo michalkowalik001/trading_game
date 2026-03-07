@@ -404,7 +404,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
   <div id="paywall-title">FREE ROUNDS USED UP</div>
   <div id="paywall-balance-line" style="font-size:clamp(.8rem,3vw,1rem);color:#ccd6f0;letter-spacing:.08em;text-align:center;line-height:1.7;">
     Your current balance: <span id="paywall-balance-val" style="color:var(--gold);font-weight:700;">$100.00</span><br>
-    <span style="color:#8899aa;">You're on your way to becoming a Wall Street shark. 🦈<br>Don't stop now and unlock unlimited rounds.</span>
+    <span style="color:#8899aa;">You're on your way to becoming a Wall Street shark. 🦈<br>Don't stop now.</span>
   </div>
   <div id="paywall-price">$2.99</div>
   <div style="font-size:.72rem;color:#8899aa;letter-spacing:.08em;text-align:center;max-width:340px;line-height:1.7;">
@@ -601,19 +601,45 @@ function isUnlocked(){
 
 function checkUnlockOnLoad(){
   try{
-    // Check if returning from Stripe with ?unlocked=true
     var search=window.location.search||'';
     if(search.indexOf('unlocked=true')!==-1){
       localStorage.setItem(LS_KEY,'1');
-      // Clean URL — wrap in try/catch, Safari can reject this
+      // Restore saved game state if it exists and is recent (within 30 min)
+      try{
+        var raw=localStorage.getItem('tmg_saved_state');
+        if(raw){
+          var state=JSON.parse(raw);
+          var age=Date.now()-(state.savedAt||0);
+          if(age < 30*60*1000){ // within 30 minutes
+            balance=state.balance||100;
+            totalPnL=state.totalPnL||0;
+            roundNum=state.roundNum||0;
+            equityCurve=state.equityCurve||[balance];
+            initialBalance=state.initialBalance||balance;
+            goalAmount=state.goalAmount||0;
+          }
+          localStorage.removeItem('tmg_saved_state');
+        }
+      }catch(e){}
       try{ window.history.replaceState(null,'',window.location.pathname); }catch(e){}
     }
-  }catch(e){ /* ignore — not critical */ }
+  }catch(e){}
 }
 
 function handleStripeClick(){
-  // After Stripe redirects back, ?unlocked=true will be in the URL
-  // Nothing to do here — the redirect handles it
+  // Save full game state before leaving — so we can restore after payment
+  try{
+    var state={
+      balance: balance,
+      totalPnL: totalPnL,
+      roundNum: roundNum,
+      equityCurve: equityCurve,
+      initialBalance: initialBalance,
+      goalAmount: goalAmount,
+      savedAt: Date.now()
+    };
+    localStorage.setItem('tmg_saved_state', JSON.stringify(state));
+  }catch(e){}
 }
 
 function checkRestore(){
