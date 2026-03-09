@@ -97,8 +97,9 @@ html,body{
   /* Show mobile rows */
   #hud-mob-row1{
     display:flex; align-items:center; justify-content:space-between;
-    padding:5px 10px; border-top:1px solid var(--border);
+    padding:5px 10px; border-bottom:1px solid var(--border);
     background:var(--panel);
+    flex-shrink:0;
   }
   #hud-mob-stock{ display:flex; flex-direction:column; gap:1px; }
   #hud-mob-stock .hud-lbl{ font-size:.38rem; letter-spacing:.08em; }
@@ -150,7 +151,11 @@ html,body{
   position:relative;overflow:hidden;min-height:0;
   border-top:1px solid var(--border);
 }
-@media(max-width:700px){#equityWrap{display:none;}}
+@media(max-width:700px){
+  #equityWrap{display:none;}
+  #mainWrap{flex:1 1 0 !important;}
+  #chartsArea{flex:1 1 0;}
+}
 canvas{display:block;width:100%;height:100%;touch-action:none;}
 .chart-label{
   position:absolute;top:6px;left:10px;
@@ -421,20 +426,21 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
       <div class="hud-cell"><span class="hud-lbl">Time</span><span class="hud-val" id="hSessionTimeMob">00:00</span></div>
       <div class="hud-cell"><span class="hud-lbl">Round</span><span class="hud-val" id="hRoundMob">—</span></div>
     </div>
-    <!-- MOBILE row 2: Stock + Balance (BOTTOM, Stock first) -->
-    <div id="hud-mob-row1">
-      <div id="hud-mob-stock">
-        <span class="hud-lbl">Stock</span>
-        <span class="hud-val" id="hStockMob" style="color:var(--gold)">—</span>
-      </div>
-      <div id="hud-mob-balance">
-        <span class="hud-lbl">Balance</span>
-        <span class="hud-val" id="hBalanceMob">—</span>
-      </div>
-    </div>
+
   </div>
 
   <div id="mobileDesc"></div>
+  <!-- Stock + Balance bar, sits between desc and chart -->
+  <div id="hud-mob-row1">
+    <div id="hud-mob-stock">
+      <span class="hud-lbl">Stock</span>
+      <span class="hud-val" id="hStockMob" style="color:var(--gold)">—</span>
+    </div>
+    <div id="hud-mob-balance">
+      <span class="hud-lbl">Balance</span>
+      <span class="hud-val" id="hBalanceMob">—</span>
+    </div>
+  </div>
 
   <!-- CHARTS -->
   <div id="chartsArea">
