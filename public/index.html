@@ -88,11 +88,36 @@ html,body{
 .hud-cell:last-child{border-right:none;}
 .hud-lbl{font-size:.56rem;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;white-space:nowrap;}
 .hud-val{font-size:.92rem;font-weight:700;color:#fff;white-space:nowrap;}
+/* Mobile HUD rows — hidden on desktop */
+#hud-mob-row1{ display:none; }
+#hud-mob-row2{ display:none; }
 @media(max-width:700px){
-  .hud-cell{ padding:3px 6px; }
-  .hud-lbl{ font-size:.38rem; letter-spacing:.06em; }
-  .hud-val{ font-size:.72rem; }
-  .hud-val{ font-size:.74rem; }
+  /* Hide desktop rows */
+  #hud-row1{ display:none !important; }
+  /* Show mobile rows */
+  #hud-mob-row1{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:5px 10px; border-bottom:1px solid var(--border);
+    background:var(--panel);
+  }
+  #hud-mob-balance{
+    display:flex; flex-direction:column; gap:1px;
+    border-right:2px solid var(--gold);
+    padding-right:12px; margin-right:8px;
+  }
+  #hud-mob-balance .hud-lbl{ font-size:.38rem; color:var(--gold); letter-spacing:.12em; }
+  #hud-mob-balance .hud-val{ font-size:.95rem; color:var(--gold); font-weight:700; }
+  #hud-mob-stock{ display:flex; flex-direction:column; gap:1px; }
+  #hud-mob-stock .hud-lbl{ font-size:.38rem; letter-spacing:.08em; }
+  #hud-mob-stock .hud-val{ font-size:.85rem; }
+  #hud-mob-row2{
+    display:flex; overflow-x:auto; scrollbar-width:none;
+    border-bottom:1px solid var(--border);
+  }
+  #hud-mob-row2::-webkit-scrollbar{ display:none; }
+  #hud-mob-row2 .hud-cell{ padding:3px 8px; flex-shrink:0; }
+  #hud-mob-row2 .hud-lbl{ font-size:.36rem; letter-spacing:.06em; }
+  #hud-mob-row2 .hud-val{ font-size:.72rem; }
 }
 .hud-val.green{color:var(--green);}
 .hud-val.red{color:var(--red);}
@@ -122,7 +147,7 @@ html,body{
   position:relative;overflow:hidden;min-height:0;
   border-top:1px solid var(--border);
 }
-@media(max-width:700px){#equityWrap{flex:0 0 18%;}}
+@media(max-width:700px){#equityWrap{flex:0 0 22%; min-height:0;}}
 canvas{display:block;width:100%;height:100%;touch-action:none;}
 .chart-label{
   position:absolute;top:6px;left:10px;
@@ -167,11 +192,11 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 #mobileDesc{
   display:none;
   font-family:'IBM Plex Mono',monospace;
-  font-size:.58rem;color:rgba(255,255,255,.45);
-  padding:3px 10px 3px 10px;
+  font-size:.6rem;color:rgba(255,255,255,.5);
+  padding:4px 10px;
   border-bottom:1px solid var(--border);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  letter-spacing:.03em;
+  letter-spacing:.03em;background:var(--panel);
 }
 @media(max-width:700px){#mobileDesc{display:block;}}
 
@@ -346,7 +371,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 
 <!-- LOADING -->
 <div id="loading">
-  <div style="font-size:1.5rem;font-weight:700;letter-spacing:.4em;color:var(--gold)">THE MARKET GAME</div>
+  <div style="font-size:1.5rem;font-weight:700;letter-spacing:.4em;color:var(--gold);text-align:center;width:100%">THE MARKET GAME</div>
   <div id="loading-text">LOADING STOCKS...</div>
   <div id="loading-bar"><div id="loading-fill"></div></div>
   <div id="loading-error"></div>
@@ -370,8 +395,9 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
     </div>
   </div>
 
-  <!-- HUD: one row desktop / two rows mobile -->
+  <!-- HUD -->
   <div id="hud">
+    <!-- DESKTOP row: all stats in one line -->
     <div class="hud-row" id="hud-row1">
       <div class="hud-cell"><span class="hud-lbl">Round P&amp;L</span><span class="hud-val" id="hRoundPnl">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Session P&amp;L</span><span class="hud-val" id="hPnl">—</span></div>
@@ -382,13 +408,29 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
       <div class="hud-cell" id="hud-stock-desktop"><span class="hud-lbl">Stock</span><span class="hud-val" id="hStock" style="color:var(--gold)">—</span></div>
       <div class="hud-cell" id="hud-balance-right"><span class="hud-lbl">Balance</span><span class="hud-val" id="hBalance">—</span></div>
     </div>
-    <div class="hud-row" id="hud-row2">
+    <!-- MOBILE row 1: Balance + Stock name -->
+    <div id="hud-mob-row1">
+      <div id="hud-mob-balance">
+        <span class="hud-lbl">Balance</span>
+        <span class="hud-val" id="hBalanceMob">—</span>
+      </div>
+      <div id="hud-mob-stock">
+        <span class="hud-lbl">Stock</span>
+        <span class="hud-val" id="hStockMob" style="color:var(--gold)">—</span>
+      </div>
+    </div>
+    <!-- MOBILE row 2: stats scrollable -->
+    <div id="hud-mob-row2">
+      <div class="hud-cell"><span class="hud-lbl">Round P&amp;L</span><span class="hud-val" id="hRoundPnlMob">—</span></div>
+      <div class="hud-cell"><span class="hud-lbl">Session P&amp;L</span><span class="hud-val" id="hPnlMob">—</span></div>
+      <div class="hud-cell"><span class="hud-lbl">Goal</span><span class="hud-val" id="hGoalPctMob">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Open P&amp;L</span><span class="hud-val" id="hOpenMob">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Time</span><span class="hud-val" id="hSessionTimeMob">00:00</span></div>
       <div class="hud-cell"><span class="hud-lbl">Round</span><span class="hud-val" id="hRoundMob">—</span></div>
-      <div class="hud-cell"><span class="hud-lbl">Stock</span><span class="hud-val" id="hStockMob" style="color:var(--gold)">—</span></div>
     </div>
   </div>
+
+  <div id="mobileDesc"></div>
 
   <!-- CHARTS -->
   <div id="chartsArea">
@@ -1873,10 +1915,20 @@ function updateHUD(){
   document.getElementById('hRound').textContent=roundNum;
   document.getElementById('hStock').textContent=stockName(currentSym);
   // Mirror to mobile row 2
-  [['hOpenMob','hOpen'],['hSessionTimeMob','hSessionTime'],['hRoundMob','hRound'],['hStockMob','hStock']].forEach(function(pair){
+  // Sync mobile row 2 fields
+  var _mobFields=[
+    ['hRoundPnlMob','hRoundPnl'],['hPnlMob','hPnl'],['hGoalPctMob','hGoalPct'],
+    ['hOpenMob','hOpen'],['hSessionTimeMob','hSessionTime'],['hRoundMob','hRound']
+  ];
+  _mobFields.forEach(function(pair){
     var ms=document.getElementById(pair[0]),ds=document.getElementById(pair[1]);
     if(ms&&ds){ms.textContent=ds.textContent;ms.className=ds.className;}
   });
+  // Mobile row 1: balance + stock
+  var _mb=document.getElementById('hBalanceMob');
+  if(_mb) _mb.textContent=document.getElementById('hBalance').textContent;
+  var _ms=document.getElementById('hStockMob');
+  if(_ms){ _ms.textContent=stockName(currentSym); }
   document.getElementById('stockTag').textContent=currentSym;
   var _de=document.getElementById('stockDesc');
   if(_de) _de.textContent=STOCK_DESCS[currentSym]||'';
