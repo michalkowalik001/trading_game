@@ -97,19 +97,22 @@ html,body{
   /* Show mobile rows */
   #hud-mob-row1{
     display:flex; align-items:center; justify-content:space-between;
-    padding:5px 10px; border-bottom:1px solid var(--border);
+    padding:5px 10px; border-top:1px solid var(--border);
     background:var(--panel);
   }
-  #hud-mob-balance{
-    display:flex; flex-direction:column; gap:1px;
-    border-right:2px solid var(--gold);
-    padding-right:12px; margin-right:8px;
-  }
-  #hud-mob-balance .hud-lbl{ font-size:.38rem; color:var(--gold); letter-spacing:.12em; }
-  #hud-mob-balance .hud-val{ font-size:.95rem; color:var(--gold); font-weight:700; }
   #hud-mob-stock{ display:flex; flex-direction:column; gap:1px; }
   #hud-mob-stock .hud-lbl{ font-size:.38rem; letter-spacing:.08em; }
   #hud-mob-stock .hud-val{ font-size:.85rem; }
+  #hud-mob-balance{
+    display:flex; flex-direction:column; gap:1px; align-items:flex-end;
+    border-left:2px solid var(--gold);
+    padding-left:12px;
+    background:rgba(255,196,0,.07);
+    padding:4px 10px 4px 12px;
+    border-radius:3px;
+  }
+  #hud-mob-balance .hud-lbl{ font-size:.38rem; color:var(--gold); letter-spacing:.12em; }
+  #hud-mob-balance .hud-val{ font-size:.95rem; color:var(--gold); font-weight:700; }
   #hud-mob-row2{
     display:flex; overflow-x:auto; scrollbar-width:none;
     border-bottom:1px solid var(--border);
@@ -147,7 +150,7 @@ html,body{
   position:relative;overflow:hidden;min-height:0;
   border-top:1px solid var(--border);
 }
-@media(max-width:700px){#equityWrap{flex:0 0 22%; min-height:0;}}
+@media(max-width:700px){#equityWrap{display:none;}}
 canvas{display:block;width:100%;height:100%;touch-action:none;}
 .chart-label{
   position:absolute;top:6px;left:10px;
@@ -192,10 +195,11 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
 #mobileDesc{
   display:none;
   font-family:'IBM Plex Mono',monospace;
-  font-size:.6rem;color:rgba(255,255,255,.5);
+  font-size:.58rem;color:rgba(255,255,255,.5);
   padding:4px 10px;
   border-bottom:1px solid var(--border);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  white-space:normal;overflow:hidden;
+  line-height:1.4;
   letter-spacing:.03em;background:var(--panel);
 }
 @media(max-width:700px){#mobileDesc{display:block;}}
@@ -408,18 +412,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
       <div class="hud-cell" id="hud-stock-desktop"><span class="hud-lbl">Stock</span><span class="hud-val" id="hStock" style="color:var(--gold)">—</span></div>
       <div class="hud-cell" id="hud-balance-right"><span class="hud-lbl">Balance</span><span class="hud-val" id="hBalance">—</span></div>
     </div>
-    <!-- MOBILE row 1: Balance + Stock name -->
-    <div id="hud-mob-row1">
-      <div id="hud-mob-balance">
-        <span class="hud-lbl">Balance</span>
-        <span class="hud-val" id="hBalanceMob">—</span>
-      </div>
-      <div id="hud-mob-stock">
-        <span class="hud-lbl">Stock</span>
-        <span class="hud-val" id="hStockMob" style="color:var(--gold)">—</span>
-      </div>
-    </div>
-    <!-- MOBILE row 2: stats scrollable -->
+    <!-- MOBILE row 1: stats scrollable (TOP) -->
     <div id="hud-mob-row2">
       <div class="hud-cell"><span class="hud-lbl">Round P&amp;L</span><span class="hud-val" id="hRoundPnlMob">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Session P&amp;L</span><span class="hud-val" id="hPnlMob">—</span></div>
@@ -427,6 +420,17 @@ canvas{display:block;width:100%;height:100%;touch-action:none;}
       <div class="hud-cell"><span class="hud-lbl">Open P&amp;L</span><span class="hud-val" id="hOpenMob">—</span></div>
       <div class="hud-cell"><span class="hud-lbl">Time</span><span class="hud-val" id="hSessionTimeMob">00:00</span></div>
       <div class="hud-cell"><span class="hud-lbl">Round</span><span class="hud-val" id="hRoundMob">—</span></div>
+    </div>
+    <!-- MOBILE row 2: Stock + Balance (BOTTOM, Stock first) -->
+    <div id="hud-mob-row1">
+      <div id="hud-mob-stock">
+        <span class="hud-lbl">Stock</span>
+        <span class="hud-val" id="hStockMob" style="color:var(--gold)">—</span>
+      </div>
+      <div id="hud-mob-balance">
+        <span class="hud-lbl">Balance</span>
+        <span class="hud-val" id="hBalanceMob">—</span>
+      </div>
     </div>
   </div>
 
