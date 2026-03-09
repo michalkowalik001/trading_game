@@ -1968,7 +1968,7 @@ function updateHUD(){
   const gEl=document.getElementById('hGoalPct');
   if(goalAmount>0){
     const gPct=(balance/goalAmount)*100;
-    gEl.textContent=gPct.toFixed(2)+'% of goal';
+    gEl.textContent=gPct.toFixed(2)+'%';
     gEl.className='hud-val '+(gPct>=100?'green':gPct>=50?'':'red');
     if(gPct>=100&&!goalToastShown){ goalToastShown=true; showGoalToast(); }
   }else{ gEl.textContent='no goal'; gEl.className='hud-val'; }
